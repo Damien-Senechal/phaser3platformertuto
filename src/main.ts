@@ -5,13 +5,17 @@ import UI from './scenes/UI'
 
 const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
-	width: 600,
+	width: 800,
 	height: 600,
 	pixelArt: true,
+	fps: {
+		target: 60,
+		forceSetTimeOut: true
+	},
 	physics: {
 		default: 'matter',
 		matter: {
-			debug:true
+			debug:true,
 		}
 	},
 	scene: [Game, UI]

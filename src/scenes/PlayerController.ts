@@ -1,19 +1,25 @@
 import Phaser from 'phaser'
 import StateMachine from '~/statemachine/StateMachine'
 import { sharedInstance as events} from './EventCenter'
+import ObstaclesController from './ObstaclesController'
 
 type CursorKeys = Phaser.Types.Input.Keyboard.CursorKeys
 
 export default class PlayerController
 {
+    private scene: Phaser.Scene
     private sprite: Phaser.Physics.Matter.Sprite
     private cursors: CursorKeys
     private stateMachine: StateMachine
+    private obstacles: ObstaclesController
+    private health = 100
 
-    constructor(sprite: Phaser.Physics.Matter.Sprite, cursors: CursorKeys)
+    constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, cursors: CursorKeys, obstacles: ObstaclesController)
     {
+        this.scene = scene
         this.sprite = sprite
         this.cursors = cursors
+        this.obstacles = obstacles
 
         this.createAnimations()
 
@@ -31,10 +37,19 @@ export default class PlayerController
                 onEnter: this.jumpOnEnter,
                 onUpdate: this.jumpOnUpdate
             })
+            .addState('spike-hit', {
+                onEnter: this.spikeHitOnEnter
+            })
             .setState('idle')
 
             this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
                 const body = data.bodyB as MatterJS.BodyType
+                if(this.obstacles.is('spikes', body))
+                {
+                    this.stateMachine.setState('spike-hit')
+                    return
+                }
+
                 const gameObject = body.gameObject
 
                 if(!gameObject)
@@ -58,6 +73,13 @@ export default class PlayerController
                 {
                     case 'coin':
                         events.emit('coin-collected')
+                        sprite.destroy()
+                        break
+                    
+                    case 'melon':
+                        const value = sprite.getData('healthPoints') ?? 10
+                        this.health = Phaser.Math.Clamp(this.health + value, 0, 100)
+                        events.emit('health-changed', this.health)
                         sprite.destroy()
                         break
                 }
@@ -140,6 +162,45 @@ export default class PlayerController
             this.sprite.flipX = false
             this.sprite.setVelocityX(speed)
         }
+    }
+
+    private spikeHitOnEnter()
+    {
+        this.sprite.setVelocityY(-12)
+        this.health = Phaser.Math.Clamp(this.health-10, 0, 100)
+
+        events.emit('health-changed', this.health)
+
+        const startColor = Phaser.Display.Color.ValueToColor(0xffffff)
+        const endColor = Phaser.Display.Color.ValueToColor(0xff0000)
+
+        this.scene.tweens.addCounter({
+            from:0,
+            to:100,
+            duration:100,
+            repeat:2,
+            yoyo:true,
+            ease: Phaser.Math.Easing.Sine.InOut,
+            onUpdate: tween => {
+                const value = tween.getValue()
+                const colorObject = Phaser.Display.Color.Interpolate.ColorWithColor(
+                    startColor, 
+                    endColor,
+                    100,
+                    value
+                )
+
+                const color = Phaser.Display.Color.GetColor(
+                    colorObject.r,
+                    colorObject.g,
+                    colorObject.b
+                )
+
+                this.sprite.setTint(color)
+            }
+        })
+
+        this.stateMachine.setState('idle')
     }
 
     private createAnimations()
