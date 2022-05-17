@@ -55,7 +55,7 @@ export default class UI extends Phaser.Scene
 
     private handleHealthChanged(value: number)
     {
-        this.tweens.addCounter({
+        /*this.tweens.addCounter({
             from: this.lastHealth,
             to: value,
             duration: 200,
@@ -64,7 +64,7 @@ export default class UI extends Phaser.Scene
                 const value = tween.getValue()
                 this.setHealthBar(value)
             }
-        })
+        })*/
         this.setHealthBar(value)
         this.lastHealth = value
     }
