@@ -45,6 +45,9 @@ export default class PlayerController
             .addState('snowman-hit', {
                 onEnter: this.snowmanHitOnEnter
             })
+            .addState('snowman-stomp', {
+                onEnter: this.snowmanStompOnEnter
+            })
             .setState('idle')
 
             this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
@@ -61,6 +64,7 @@ export default class PlayerController
                     if(this.sprite.y < body.position.y)
                     {
                         //stomp on snowman
+                        this.stateMachine.setState('snowman-stomp')
                     }
                     else
                     {
@@ -273,6 +277,15 @@ export default class PlayerController
                 this.sprite.setTint(color)
             }
         })
+
+        this.stateMachine.setState('idle')
+    }
+
+    private snowmanStompOnEnter()
+    {
+        this.sprite.setVelocityY(-10)
+
+        events.emit('snowman-stomped', this.lastSnowman)
 
         this.stateMachine.setState('idle')
     }

@@ -1,14 +1,18 @@
+import { Events } from "matter"
 import StateMachine from "../statemachine/StateMachine"
+import { sharedInstance as events } from "./EventCenter"
 
 export default class SnowmanController
 {
+    private scene: Phaser.Scene
     private sprite: Phaser.Physics.Matter.Sprite
     private stateMachine: StateMachine
 
     private moveTime = 0
 
-    constructor(sprite: Phaser.Physics.Matter.Sprite)
+    constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite)
     {
+        this.scene = scene
         this.sprite = sprite
 
         this.createAnimations()
@@ -28,6 +32,13 @@ export default class SnowmanController
         })
         .addState('dead')
         .setState('idle')
+
+        events.on('snowman-stomped', this.handleStomped, this)
+    }
+
+    destroy()
+    {
+        events.off('snowman-stomped', this.handleStomped, this)
     }
 
     update(dt: number)
@@ -113,5 +124,27 @@ export default class SnowmanController
         {
             this.stateMachine.setState('move-left')
         }
+    }
+
+    private handleStomped(snowman: Phaser.Physics.Matter.Sprite)
+    {
+        if(this.sprite !== snowman)
+        {
+            return
+        }
+
+        events.off('snowman-stomped', this.handleStomped, this)
+
+        this.scene.tweens.add({
+            targets: this.sprite,
+            displayHeight: 0,
+            y: this.sprite.y+(this.sprite.displayHeight * .5),
+            duration: 200,
+            onComplete: () => {
+                this.sprite.destroy()
+            }
+        })
+
+        this.stateMachine.setState('dead')
     }
 }

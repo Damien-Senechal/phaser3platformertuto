@@ -55,6 +55,7 @@ export default class UI extends Phaser.Scene
 
     private handleHealthChanged(value: number)
     {
+        //make the game lag
         /*this.tweens.addCounter({
             from: this.lastHealth,
             to: value,
