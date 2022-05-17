@@ -14,6 +14,8 @@ export default class PlayerController
     private obstacles: ObstaclesController
     private health = 100
 
+    private lastSnowman?: Phaser.Physics.Matter.Sprite
+
     constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, cursors: CursorKeys, obstacles: ObstaclesController)
     {
         this.scene = scene
@@ -40,6 +42,9 @@ export default class PlayerController
             .addState('spike-hit', {
                 onEnter: this.spikeHitOnEnter
             })
+            .addState('snowman-hit', {
+                onEnter: this.snowmanHitOnEnter
+            })
             .setState('idle')
 
             this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
@@ -48,6 +53,21 @@ export default class PlayerController
                 {
                     this.stateMachine.setState('spike-hit')
                     return
+                }
+
+                if(this.obstacles.is('snowman', body))
+                {
+                    this.lastSnowman = body.gameObject
+                    if(this.sprite.y < body.position.y)
+                    {
+                        //stomp on snowman
+                    }
+                    else
+                    {
+                        //hit by snowmen
+                        this.stateMachine.setState('snowman-hit')
+                    }
+                    return 
                 }
 
                 const gameObject = body.gameObject
@@ -173,6 +193,60 @@ export default class PlayerController
 
         const startColor = Phaser.Display.Color.ValueToColor(0xffffff)
         const endColor = Phaser.Display.Color.ValueToColor(0xff0000)
+
+        this.scene.tweens.addCounter({
+            from:0,
+            to:100,
+            duration:100,
+            repeat:2,
+            yoyo:true,
+            ease: Phaser.Math.Easing.Sine.InOut,
+            onUpdate: tween => {
+                const value = tween.getValue()
+                const colorObject = Phaser.Display.Color.Interpolate.ColorWithColor(
+                    startColor, 
+                    endColor,
+                    100,
+                    value
+                )
+
+                const color = Phaser.Display.Color.GetColor(
+                    colorObject.r,
+                    colorObject.g,
+                    colorObject.b
+                )
+
+                this.sprite.setTint(color)
+            }
+        })
+
+        this.stateMachine.setState('idle')
+    }
+
+    private snowmanHitOnEnter()
+    {
+        if(this.lastSnowman)
+        {
+            if(this.sprite.x < this.lastSnowman.x)
+            {
+                this.sprite.setVelocityX(-20)
+            }
+            else
+            {
+                this.sprite.setVelocityX(20)
+            }
+        }
+        else
+        {
+            this.sprite.setVelocityY(-20)
+        }
+
+        this.health = Phaser.Math.Clamp(this.health-10, 0, 100)
+
+        events.emit('health-changed', this.health)
+
+        const startColor = Phaser.Display.Color.ValueToColor(0xffffff)
+        const endColor = Phaser.Display.Color.ValueToColor(0x0000ff)
 
         this.scene.tweens.addCounter({
             from:0,

@@ -31,7 +31,7 @@ export default class UI extends Phaser.Scene
         })
 
         events.on('coin-collected', this.handleCoinCollected, this)
-        events.on('health-change', this.handleHealthChanged, this)
+        events.on('health-changed', this.handleHealthChanged, this)
 
         this.events.once(Phaser.Scenes.Events.DESTROY, () => {
             events.off('coin-collected', this.handleCoinCollected, this)

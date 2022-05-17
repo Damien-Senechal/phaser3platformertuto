@@ -2,6 +2,7 @@ import { Vector } from 'matter'
 import Phaser from 'phaser'
 import ObstaclesController from './ObstaclesController'
 import PlayerController from './PlayerController'
+import SnowmanController from './SnowmanController'
 
 export default class Game extends Phaser.Scene
 {
@@ -9,6 +10,7 @@ export default class Game extends Phaser.Scene
     private penguin?: Phaser.Physics.Matter.Sprite
     private playerController?: PlayerController
     private obstacles!: ObstaclesController
+    private snowmen: SnowmanController[] = []
 
     constructor()
     {
@@ -19,11 +21,13 @@ export default class Game extends Phaser.Scene
     {
         this.cursors = this.input.keyboard.createCursorKeys()
         this.obstacles =  new ObstaclesController()
+        this.snowmen = []
     }
 
     preload()
     {
         this.load.atlas('penguin', 'assets/penguin.png', 'assets/penguin.json')
+        this.load.atlas('snowman', 'assets/snowman.png', 'assets/snowman.json')
         this.load.image('tiles', 'assets/sheet.png')
         this.load.tilemapTiledJSON('tilemap', 'assets/game.json')
 
@@ -61,6 +65,15 @@ export default class Game extends Phaser.Scene
                     this.cameras.main.startFollow(this.penguin)
                     break
                 }
+                case 'snowman':
+                {
+                    const snowman = this.matter.add.sprite(x, y, 'snowman')
+                        .setFixedRotation()
+
+                    this.snowmen.push(new SnowmanController(snowman))
+                    this.obstacles.add('snowman', snowman.body as MatterJS.BodyType)
+                    break
+                }
                 case 'star':
                 {
                     const coin = this.matter.add.sprite(x, y, 'coin', undefined, {
@@ -93,11 +106,7 @@ export default class Game extends Phaser.Scene
 
     update(t: number, dt: number)
     {
-        if(!this.playerController)
-        {
-            return
-        }
-
-        this.playerController.update(dt)
+        this.playerController?.update(dt)
+        this.snowmen.forEach(snowman => snowman.update(dt))
     }
 }
