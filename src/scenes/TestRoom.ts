@@ -17,6 +17,7 @@ export default class TestRoom extends Phaser.Scene
     private hookSpeed=10
     private constraintSpeed = 2
     private ropeTolerance = 6
+    private cursors
     
     private WALL = 'WALL'
     private BALL = 'BALL'
@@ -99,6 +100,8 @@ export default class TestRoom extends Phaser.Scene
                 }
             }
         }, this)
+
+        this.cursors = this.input.keyboard.createCursorKeys();
     }
 
     //method to fire the hook
