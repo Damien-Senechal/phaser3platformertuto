@@ -9,9 +9,9 @@ const WALL = 0;
 
 const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
-	width: 600,
-	height: 400,
-	zoom:2,
+	width: 300,
+	height: 200,
+	zoom:4,
 	pixelArt: true,
 	fps: {
 		target: 60,

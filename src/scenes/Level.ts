@@ -3,6 +3,7 @@ import Phaser from 'phaser'
 import ObstaclesController from './ObstaclesController'
 import PlayerController from './PlayerController'
 import SnowmanController from './SnowmanController'
+import LoadRessources from './LoadRessources'
 
 export default class Level extends Phaser.Scene
 {
@@ -14,7 +15,7 @@ export default class Level extends Phaser.Scene
 
     constructor()
     {
-        super('game')
+        super('level')
     }
 
     init()
@@ -29,20 +30,18 @@ export default class Level extends Phaser.Scene
 
         //update world physics 30 times per second
         this.matter.world.update30Hz();
-
-        //set the bound of the world
-        this.matter.world.setBounds(10, 10,  this.screenWidth - 20, this.screenHeight - 20);
     }
 
     preload()
     {
-        this.load.image('Elijah', 'assets/elijah_proto_sprite.png')
+        new LoadRessources(this)
     }
 
     create()
     {
         this.elijah = this.matter.add.sprite(200, 200, 'Elijah')
-                        .setFixedRotation()
+        this.cameras.main.startFollow(this.elijah)
+        this.load.image('tiles', 'assets/sheet.png')
     }
 
     destroy()
