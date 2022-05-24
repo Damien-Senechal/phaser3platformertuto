@@ -3,6 +3,7 @@ import Phaser from 'phaser'
 import ObstaclesController from './ObstaclesController'
 import PlayerController from './PlayerController'
 import SnowmanController from './SnowmanController'
+import { GameObjects } from 'phaser'
 
 export default class TestRoom extends Phaser.Scene
 {
@@ -12,6 +13,10 @@ export default class TestRoom extends Phaser.Scene
     private hero
     private hook
     private rope
+    private heroSize = 16
+    private hookSpeed=10
+    private constraintSpeed = 2
+    private ropeTolerance = 6
     
     private WALL = 'WALL'
     private BALL = 'BALL'
@@ -29,7 +34,7 @@ export default class TestRoom extends Phaser.Scene
 
     preload()
     {
-        this.load.atlas('penguin', 'assets/penguin.png', 'assets/penguin.json')
+
     }
 
     create()
@@ -56,35 +61,86 @@ export default class TestRoom extends Phaser.Scene
             });
             poly.label = this.WALL
         }
-
         // adding a bouncing ball labeled as BALL
-        this.hero = this.matter.add.rectangle(this.screenWidth / 2, this.screenHeight / 2, 16, 16,{
+        this.hero = this.matter.add.rectangle(this.screenWidth / 2, this.screenHeight / 2, this.heroSize, this.heroSize,{
             restitution: 0.5
         });
-        this.hero.setStatic(true)
         this.hero.label = this.BALL;
+
+        console.log(this.hero)
+
+        //this.hero.setStatic(true)
         //this.matter.body.setStatic(box, true)
 
         this.hook = null
+        let me = this
 
-        //this.input.on("pointerdown", this.fireHook, this)
+        this.input.on("pointerdown", this.fireHook, this)
 
         this.rope = null
 
-        let me = this
-        /*this.matter.world.on("collisionstart", function(e, b1, b2){
-            if((b1.label = me.BALL) || (b2.label = me.BALL))
-            {
-                me.releaseHook()
-                return
-            }
-
-            if((b1.label == me.HOOK) || (b2.label = me.HOOK) && !me.rope)
-            {
+        // collision listener
+        this.matter.world.on("collisionstart", function(e, b1, b2){
+ 
+            // when the hook collides with something, let's make it static and create the joint
+            if((b1.label == me.HOOK || b2.label == me.HOOK) && !me.rope){
+ 
                 // make the hook static
-                me.hook.static = true
+                me.matter.body.setStatic(me.hook, true)
+ 
+                // calculate the distance between the ball and the hook
+                let distance = Phaser.Math.Distance.Between(me.hero.position.x, me.hero.position.y, me.hook.position.x, me.hook.position.y);
+ 
+                // is the distance fairly greater than hero size?
+                if(distance > me.heroSize * 2){
+ 
+                    // add the constraint
+                    me.rope = me.matter.add.constraint(me.hero, me.hook, distance, 0.1);
+                }
             }
-        })*/
+        }, this)
+    }
+
+    //method to fire the hook
+    fireHook(e)
+    {
+        //do we have a constraint
+        if(this.hook)
+        {
+            //destroy the current constraint
+            this.releaseHook()
+        }
+        else{
+            //calculate the angle between the pointer and the ball
+            let angle = Phaser.Math.Angle.Between(this.hero.position.x, this.hero.position.y, e.position.x, e.position.y)
+        
+            this.hook = this.matter.add.rectangle(this.hero.position.x + (this.heroSize * 2) * Math.cos(angle), this.hero.position.y + (this.heroSize * 2) * Math.sin(angle), 10, 10)
+            this.hook.label = this.HOOK
+
+            //give the proper velocity
+            this.matter.body.setVelocity(this.hook,{
+                x: this.hookSpeed * Math.cos(angle),
+                y: this.hookSpeed * Math.sin(angle)
+            })
+        }
+        
+    }
+
+    //method to remove the hook
+    releaseHook()
+    {
+        //is there a constraint? remove it
+        if(this.rope)
+        {
+            this.matter.world.removeConstraint(this.rope)
+            this.rope = null
+        }
+
+        if(this.hook)
+        {
+            this.matter.world.remove(this.hook)
+            this.hook = null
+        }
     }
 
     destroy()
@@ -94,7 +150,17 @@ export default class TestRoom extends Phaser.Scene
 
     update(t: number, dt: number)
     {
-
+        // is there a constraint? Shrink it
+        if(this.rope){
+            this.rope.length -= this.constraintSpeed;
+            let hookPosition = this.hook.position;
+            let heroPosition = this.hero.position;
+            let distance = Phaser.Math.Distance.Between(hookPosition.x, hookPosition.y, heroPosition.x, heroPosition.y);
+            if(distance - this.rope.length > this.ropeTolerance){
+                this.rope.length = distance;
+            }
+            this.rope.length = Math.max(this.rope.length, this.heroSize * 2);
+        }
         console.log(this.hero.isStatic)
     }
 }
