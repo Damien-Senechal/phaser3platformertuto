@@ -53,8 +53,16 @@ export default class Level extends Phaser.Scene
         map.createLayer('obstacles', tileset)
 
         const objectsLayer = map.getObjectLayer('objects')
+        const collisionsLayer = map.getObjectLayer('collisions')
 
         this.matter.world.convertTilemapLayer(ground)
+
+        collisionsLayer.objects.forEach(objData => {
+            const {x = 0, y = 0, name, width = 0, height = 0} = objData
+
+            this.matter.add.rectangle(x+width/2, y+height/2, width, height, {isStatic: true})
+            
+        })
 
         objectsLayer.objects.forEach(objData => {
             const {x = 0, y = 0, name, width = 0, height = 0} = objData
