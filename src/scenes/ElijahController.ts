@@ -29,7 +29,6 @@ export default class PlayerController
 
         this.hook = null
         this.rope = null
-        this.line = null
         let me = this
 
         //this.scene.input.on("pointerdown", this.fireHook, this.scene)
