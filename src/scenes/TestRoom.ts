@@ -125,6 +125,7 @@ export default class TestRoom extends Phaser.Scene
                 x: this.hookSpeed * Math.cos(angle),
                 y: this.hookSpeed * Math.sin(angle)
             })
+            //this.hook = this.add.sprite(this.hero.position.x, this.hero.position.y, '')
         }
         
     }

@@ -1,3 +1,4 @@
+import { BodyType } from 'matter'
 import Phaser from 'phaser'
 import StateMachine from '~/statemachine/StateMachine'
 import ObstaclesController from './ObstaclesController'
@@ -14,6 +15,9 @@ export default class PlayerController
     private keyD
     private keyQ
     private keySpace
+    private hook
+    private rope
+    private graphics
 
     constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite)
     {
@@ -22,6 +26,13 @@ export default class PlayerController
         //this.obstacles = obstacles
 
         this.inputManager()
+
+        this.hook = null
+        this.rope = null
+        this.line = null
+        let me = this
+
+        //this.scene.input.on("pointerdown", this.fireHook, this.scene)
 
         this.stateMachine = new StateMachine(this, 'player')
 
@@ -48,16 +59,21 @@ export default class PlayerController
             .setState('idle')
 
             this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
-                const body = data.bodyA as MatterJS.BodyType
-                const gameObject = body.gameObject
-                console.log(gameObject)
+                const bodyA = data.bodyA as MatterJS.BodyType
+                const bodyB = data.bodyB as MatterJS.BodyType
+                const gameObjectA = bodyA.gameObject
+                const gameObjectB = bodyB.gameObject
 
-                if(!gameObject)
+                //console.log(gameObjectA.body.label)
+
+                if(!gameObjectA)
                 {
                     return
                 }
 
-                if(gameObject instanceof Phaser.Physics.Matter.TileBody)
+                console.log(gameObjectA)
+
+                if(gameObjectA instanceof Phaser.Physics.Matter.TileBody && gameObjectA.tile.properties.ground)
                 {
                     if(this.stateMachine.isCurrentState('jump'))
                     {
@@ -66,10 +82,37 @@ export default class PlayerController
                     return
                 }
             })
+
+            if(this.hook)
+            {
+                this.hook.setOnCollide((data: MatterJS.ICollisionPair) => {
+                    const bodyA = data.bodyA as MatterJS.BodyType
+                    const bodyB = data.bodyB as MatterJS.BodyType
+                    const gameObjectA = bodyA.gameObject
+                    const gameObjectB = bodyB.gameObject
+    
+                    console.log(gameObjectA)
+                    console.log(gameObjectB)
+                })
+            }
+
+            this.scene.input.on("pointerdown", this.fireHook, this)
+            
     }
 
     update(dt: number)
     {
+        // is there a constraint? Shrink it
+        if(this.rope){
+            this.rope.length -= 2;
+            let hookPosition = this.hook.position;
+            let heroPosition = this.sprite.body.position;
+            let distance = Phaser.Math.Distance.Between(hookPosition.x, hookPosition.y, heroPosition.x, heroPosition.y);
+            if(distance - this.rope.length > 6){
+                this.rope.length = distance;
+            }
+            this.rope.length = Math.max(this.rope.length, 16 * 2);
+        }
         this.stateMachine.update(dt)
     }
 
@@ -105,7 +148,7 @@ export default class PlayerController
 
     private walkOnUpdate()
     {
-        const speed = 3
+        const speed = 2.5
 
         if(this.keyQ.isDown)
         {
@@ -141,7 +184,7 @@ export default class PlayerController
 
     private jumpOnUpdate()
     {
-        const speed = 3
+        const speed = 2.5
 
         if(this.keyQ.isDown)
         {
@@ -162,17 +205,45 @@ export default class PlayerController
 
     private grappleOnEnter()
     {
-
+        
     }
 
     private grappleOnUpdate()
     {
+        this.scene.matter.world.on("collisionstart", (e, b1, b2)=>{
+            if((b1.label == 'HOOK') || (b2.label == 'HOOK') && !this.rope)
+            {
+                this.scene.matter.body.setStatic(this.hook, true)
 
+                let distance = Phaser.Math.Distance.Between(this.sprite.x, this.sprite.y, this.hook.position.x, this.hook.position.y)
+
+                if(distance > 16*2)
+                {
+                    
+                    this.rope = this.scene.matter.add.constraint(this.sprite.body as BodyType, this.hook, distance, .5)
+                }
+            }
+        }, this)
+
+        if(!this.graphics)
+        {
+            this.graphics = this.scene.add.graphics();
+        }
+        
+        this.graphics.clear()
+
+        if(this.rope)
+        {
+            this.scene.matter.world.renderConstraint(this.rope, this.graphics, 0x00ff00, 1, 1, 1, 1, 1)
+        }
+        
+        
+        
     }
 
     private grappleOnExit()
     {
-
+        this.graphics.clear()
     }
 
     private inputManager()
@@ -180,5 +251,47 @@ export default class PlayerController
         this.keyD = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
         this.keyQ = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q)
         this.keySpace = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+    }
+
+    private fireHook(e)
+    {
+        if(this.hook)
+        {
+            //destroy the current constraint
+            this.releaseHook()
+        }
+        else
+        {
+            this.stateMachine.setState('grapple')
+            let angle = Phaser.Math.Angle.Between(this.sprite.x, this.sprite.y, e.worldX, e.worldY)
+
+            this.hook = this.scene.matter.add.rectangle(this.sprite.x+(16*2)*Math.cos(angle), this.sprite.y+(16*2)*Math.sin(angle), 5, 5)
+            this.hook.label = 'HOOK'
+
+
+            this.scene.matter.body.setVelocity(this.hook,{
+                x: 10* Math.cos(angle),
+                y: 10* Math.sin(angle)
+            })
+            //console.log(angle)
+        }
+    }
+
+    private releaseHook()
+    {
+        //is there a constraint? remove it
+        if(this.rope)
+        {
+            this.scene.matter.world.removeConstraint(this.rope)
+            this.rope = null
+        }
+
+        if(this.hook)
+        {
+            this.scene.matter.world.remove(this.hook)
+            this.hook = null
+        }
+
+        this.stateMachine.setState('idle')
     }
 }

@@ -1,5 +1,5 @@
 import * as matter from 'matter'
-import Phaser from 'phaser'
+import Phaser, { Tilemaps } from 'phaser'
 import ElijahController from './ElijahController'
 
 
@@ -27,7 +27,7 @@ export default class Level extends Phaser.Scene
         this.screenWidth = this.game.config.width
 
         //update world physics 30 times per second
-        this.matter.world.update30Hz();
+        //this.matter.world.update60Hz()
     }
 
     preload()
@@ -63,12 +63,15 @@ export default class Level extends Phaser.Scene
             {
                 case 'Elijah_spawn':
                 {
-                    this.elijah = this.matter.add.sprite(x, y, 'Elijah')
+                    this.elijah = this.matter.add.sprite(x, y, 'Elijah', 0, {label: 'Elijah'})
                         .setFixedRotation()
+                        .setData('type', 'Elijah')
+
 
                     this.elijahController = new ElijahController(this, this.elijah)
 
-                    this.cameras.main.startFollow(this.elijah, true, 0.2, 0.2)
+
+                    this.cameras.main.startFollow(this.elijah, true)
                     break
                 }
             }

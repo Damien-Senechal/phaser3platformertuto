@@ -11,8 +11,9 @@ const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
 	width: 300,
 	height: 200,
-	zoom:2,
+	zoom:3,
 	pixelArt: true,
+	backgroundColor: '#ffe0bb',
 	fps: {
 		target: 60,
 		forceSetTimeOut: true
