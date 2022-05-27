@@ -11,7 +11,7 @@ const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
 	width: 300,
 	height: 200,
-	zoom:4,
+	zoom:2,
 	pixelArt: true,
 	fps: {
 		target: 60,
@@ -20,8 +20,9 @@ const config: Phaser.Types.Core.GameConfig = {
 	physics: {
 		default: 'matter',
 		matter: {
-			debug:true,
-			gravity:true
+			debug:false,
+			gravity:{y:1}
+			
 		}
 	},
 	//scene: [Game, UI]
