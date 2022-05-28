@@ -9,7 +9,7 @@ const WALL = 0;
 
 const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
-	width: 300,
+	width: 400,
 	height: 200,
 	zoom:3,
 	pixelArt: true,
@@ -21,7 +21,7 @@ const config: Phaser.Types.Core.GameConfig = {
 	physics: {
 		default: 'matter',
 		matter: {
-			debug:true,
+			debug:false,
 			gravity:{y:1}
 			
 		}

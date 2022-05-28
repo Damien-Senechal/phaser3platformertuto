@@ -1,6 +1,7 @@
 import * as matter from 'matter'
 import Phaser, { Tilemaps } from 'phaser'
 import ElijahController from './ElijahController'
+import LoadRessources from './LoadRessources'
 
 
 export default class Level extends Phaser.Scene
@@ -32,10 +33,11 @@ export default class Level extends Phaser.Scene
 
     preload()
     {
-        //new LoadRessources(this)
-        this.load.image('Elijah', 'ressources/sprite/elijah.png')
+        new LoadRessources(this)
+        
+        /*this.load.image('Elijah', 'ressources/sprite/elijah.png')
         this.load.image('tiles', 'ressources/tileset/tile_desert3.png')
-        this.load.tilemapTiledJSON('tilemap', 'ressources/json/leveltestgrappin.json')
+        this.load.tilemapTiledJSON('tilemap', 'ressources/json/leveltestgrappin.json')*/
     }
 
     create()
@@ -74,9 +76,10 @@ export default class Level extends Phaser.Scene
                     this.elijah = this.matter.add.sprite(x, y, 'Elijah', 0, {label: 'Elijah'})
                         .setFixedRotation()
                         .setData('type', 'Elijah')
-
-
-                    this.elijahController = new ElijahController(this, this.elijah)
+                    
+                    
+                    let smoke = this.add.particles('smoke')
+                    this.elijahController = new ElijahController(this, this.elijah, smoke, ground)
 
 
                     this.cameras.main.startFollow(this.elijah, true)

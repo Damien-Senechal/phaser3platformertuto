@@ -1,5 +1,5 @@
 import { BodyType } from 'matter'
-import Phaser from 'phaser'
+import Phaser, { BlendModes } from 'phaser'
 import StateMachine from '~/statemachine/StateMachine'
 import ObstaclesController from './ObstaclesController'
 
@@ -18,11 +18,16 @@ export default class PlayerController
     private hook
     private rope
     private graphics
+    private smoke
+    private ground
 
-    constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite)
+    constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke, ground)
     {
         this.scene = scene
         this.sprite = sprite
+        this.sprite.flipX = true
+        this.smoke =  smoke
+        this.ground = ground
         //this.obstacles = obstacles
 
         this.inputManager()
@@ -142,7 +147,33 @@ export default class PlayerController
 
     private walkOnEnter()
     {
-        
+        if(this.sprite.flipX)
+        {
+            this.smoke.createEmitter({
+                speed:25,
+                //gravityX:-100,
+                gravityY:-25,
+                lifespan:500,
+                scale:{start:1, end:0.1},
+                follow:{x:this.sprite.x, y:this.sprite.y+8},
+                maxParticles: 10,
+                angle: {max:250, min:180}
+                //deathZone: {type: 'onEnter', source: this.ground}
+            })
+        }
+        else{
+            this.smoke.createEmitter({
+                speed:25,
+                //gravityX:-100,
+                gravityY:-25,
+                lifespan:500,
+                scale:{start:1, end:0.1},
+                follow:{x:this.sprite.x, y:this.sprite.y+8},
+                maxParticles: 10,
+                angle: {max:360, min:250}
+                //deathZone: {type: 'onEnter', source: this.ground}
+            })
+        }
     }
 
     private walkOnUpdate()
@@ -173,11 +204,22 @@ export default class PlayerController
 
     private walkOnExit()
     {
-
     }
 
     private jumpOnEnter()
     {
+        this.smoke.createEmitter({
+            speed:25,
+            //gravityX:-100,
+            gravityY:-25,
+            lifespan:500,
+            scale:{start:1, end:0.1},
+            follow:{x:this.sprite.x, y:this.sprite.y+8},
+            maxParticles: 10,
+            angle:{min:180, max:360}
+            //deathZone: {type: 'onEnter', source: this.ground},
+
+        })
         this.sprite.setVelocityY(-5)
     }
 
@@ -210,16 +252,19 @@ export default class PlayerController
     private grappleOnUpdate()
     {
         this.scene.matter.world.on("collisionstart", (e, b1, b2)=>{
-            if((b1.label == 'HOOK') || (b2.label == 'HOOK') && !this.rope)
+            if((b1.label == 'HOOK') || (b2.label == 'HOOK') && !this.rope && this.hook)
             {
                 this.scene.matter.body.setStatic(this.hook, true)
 
                 let distance = Phaser.Math.Distance.Between(this.sprite.x, this.sprite.y, this.hook.position.x, this.hook.position.y)
 
-                if(distance > 16*2)
+                if(distance > 16*2 && distance < 300)
                 {
                     
-                    this.rope = this.scene.matter.add.constraint(this.sprite.body as BodyType, this.hook, distance, .5)
+                    this.rope = this.scene.matter.add.constraint(this.sprite.body as BodyType, this.hook, distance, 0)
+                }
+                else{
+                    this.releaseHook();
                 }
             }
         }, this)
