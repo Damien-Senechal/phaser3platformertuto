@@ -28,7 +28,7 @@ export default class Level extends Phaser.Scene
         this.screenWidth = this.game.config.width
 
         //update world physics 30 times per second
-        //this.matter.world.update60Hz()
+        this.matter.world.update60Hz()
     }
 
     preload()
@@ -86,17 +86,21 @@ export default class Level extends Phaser.Scene
             switch(name)
             {
                 case 'Elijah_spawn':
-                {
+                {   
                     this.elijah = this.matter.add.sprite(x, y, 'Elijah', 0, {label: 'Elijah'})
-                        .setFixedRotation()
                         .setData('type', 'Elijah')
+                        .setBody({
+                            width:16,
+                            height:17
+                        })
+                    this.elijah.setFixedRotation()
                     
                     
                     let smoke = this.add.particles('smoke')
                     this.elijahController = new ElijahController(this, this.elijah, smoke)
 
 
-                    this.cameras.main.startFollow(this.elijah, true)
+                    //this.cameras.main.startFollow(this.elijah, false, 0.1, 0.1)
                     break
                 }
             }

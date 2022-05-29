@@ -21,6 +21,7 @@ export default class PlayerController
     private smoke
     private ground
     private isGrounded
+    private yPos
 
     constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke)
     {
@@ -32,6 +33,7 @@ export default class PlayerController
         //this.obstacles = obstacles
 
         this.inputManager()
+        this.createAnimations()
 
         this.hook = null
         this.rope = null
@@ -78,9 +80,14 @@ export default class PlayerController
 
                 if(gameObjectA.label === 'ground')
                 {
-                    if(this.stateMachine.isCurrentState('jump'))
+                    if(this.stateMachine.isCurrentState('jump') || this.stateMachine.isCurrentState('walk'))
                     {
+                        this.yPos = this.sprite.y
                         this.stateMachine.setState('idle')
+                    }
+                    else if(this.stateMachine.isCurrentState('idle'))
+                    {
+                        this.stateMachine.setState('walk')
                     }
                     return
                 }
@@ -104,12 +111,22 @@ export default class PlayerController
             this.rope.length = Math.max(this.rope.length, 16 * 2);
         }
         this.stateMachine.update(dt)
+
+        //console.log("this.sprite.y : "+this.sprite.y)
+        //console.log("this.yPos : "+this.yPos)
     }
 
 
     private idleOnEnter()
     {
-        
+        this.sprite.play('idle')
+        if(this.sprite.y > this.yPos)
+        {
+            this.sprite.play('jumpDown')
+        }
+        else{
+            this.sprite.play('idle')
+        }
     }
 
     private idleOnUpdate()
@@ -133,6 +150,9 @@ export default class PlayerController
 
     private walkOnEnter()
     {
+        this.yPos = this.sprite.y
+        this.sprite.play('walk')
+
         if(this.sprite.flipX)
         {
             this.smoke.createEmitter({
@@ -164,6 +184,11 @@ export default class PlayerController
 
     private walkOnUpdate()
     {
+        if(this.sprite.y > this.yPos)
+        {
+            this.sprite.play('jumpDown')
+        }
+
         const speed = 2.5
 
         if(this.keyQ.isDown)
@@ -193,6 +218,8 @@ export default class PlayerController
     }
     private jumpOnEnter()
     {
+        this.sprite.play('jumpUP')
+        
         this.smoke.createEmitter({
             speed:25,
             //gravityX:-100,
@@ -210,6 +237,10 @@ export default class PlayerController
 
     private jumpOnUpdate()
     {
+        if(this.sprite.body.velocity.y >=0)
+        {
+            this.sprite.play('jumpDown')
+        }
         const speed = 2.5
 
         if(this.keyQ.isDown)
@@ -222,16 +253,17 @@ export default class PlayerController
             this.sprite.flipX = false
             this.sprite.setVelocityX(speed)
         }
+
     }
 
     private jumpOnExit()
     {
-
+        this.sprite.play('jumpTouch')
     }
 
     private grappleOnEnter()
     {
-        
+        this.sprite.play('jumpUP')
     }
 
     private grappleOnUpdate()
@@ -328,5 +360,38 @@ export default class PlayerController
         }
 
         this.stateMachine.setState('idle')
+    }
+
+    private createAnimations(){
+        this.scene.anims.create({
+            key: 'idle',
+            frames: this.scene.anims.generateFrameNumbers('Elijah', { frames: [0, 1, 2, 3, 4 ] }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'walk',
+            frames: this.scene.anims.generateFrameNumbers('Elijah', { frames: [ 5, 6, 7, 8, 9, 10 ] }),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'jumpUP',
+            frames: this.scene.anims.generateFrameNumbers('Elijah', { frames: [ 11 ] }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'jumpDown',
+            frames: this.scene.anims.generateFrameNumbers('Elijah', { frames: [ 12 ] }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'jumpTouch',
+            frames: this.scene.anims.generateFrameNumbers('Elijah', { frames: [ 13, 14 ] }),
+            frameRate: 10,
+            repeat: 0
+        });
     }
 }
