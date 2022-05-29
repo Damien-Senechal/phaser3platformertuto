@@ -359,7 +359,7 @@ export default class PlayerController
             this.hook = null
         }
 
-        this.stateMachine.setState('idle')
+        this.stateMachine.setState('jump')
     }
 
     private createAnimations(){
