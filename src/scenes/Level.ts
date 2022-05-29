@@ -50,9 +50,9 @@ export default class Level extends Phaser.Scene
         const tileset = map.addTilesetImage('tile_desert3', 'tiles')
 
         const ground = map.createLayer('ground', tileset)
-        ground.setCollisionByProperty({ collides: true })
+        //ground.setCollisionByProperty({ collides: true })
 
-        map.createLayer('obstacles', tileset)
+        //map.createLayer('obstacles', tileset)
 
         const objectsLayer = map.getObjectLayer('objects')
         const collisionsLayer = map.getObjectLayer('collisions')
@@ -61,8 +61,22 @@ export default class Level extends Phaser.Scene
 
         collisionsLayer.objects.forEach(objData => {
             const {x = 0, y = 0, name, width = 0, height = 0} = objData
-
-            this.matter.add.rectangle(x+width/2, y+height/2, width, height, {isStatic: true})
+            switch (name)
+            {
+                case 'Ground' :
+                {
+                    const ground = this.matter.add.rectangle(x+width/2, y+height/2, width, height, {isStatic: true})
+                    ground.label = 'ground'
+                    break
+                }
+                case 'Wall' :
+                {
+                    const ground = this.matter.add.rectangle(x+width/2, y+height/2, width, height, {isStatic: true})
+                    ground.label = 'wall'
+                    break
+                }
+            }
+            
             
         })
 
@@ -79,7 +93,7 @@ export default class Level extends Phaser.Scene
                     
                     
                     let smoke = this.add.particles('smoke')
-                    this.elijahController = new ElijahController(this, this.elijah, smoke, ground)
+                    this.elijahController = new ElijahController(this, this.elijah, smoke)
 
 
                     this.cameras.main.startFollow(this.elijah, true)

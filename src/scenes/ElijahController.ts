@@ -20,14 +20,15 @@ export default class PlayerController
     private graphics
     private smoke
     private ground
+    private isGrounded
 
-    constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke, ground)
+    constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke)
     {
         this.scene = scene
         this.sprite = sprite
         this.sprite.flipX = true
         this.smoke =  smoke
-        this.ground = ground
+        this.isGrounded = false
         //this.obstacles = obstacles
 
         this.inputManager()
@@ -65,19 +66,17 @@ export default class PlayerController
             this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
                 const bodyA = data.bodyA as MatterJS.BodyType
                 const bodyB = data.bodyB as MatterJS.BodyType
-                const gameObjectA = bodyA.gameObject
+                const gameObjectA = bodyA
                 const gameObjectB = bodyB.gameObject
 
-                //console.log(gameObjectA.body.label)
+                console.log(gameObjectA)
 
                 if(!gameObjectA)
                 {
                     return
                 }
 
-                console.log(gameObjectA)
-
-                if(gameObjectA instanceof Phaser.Physics.Matter.TileBody && gameObjectA.tile.properties.ground)
+                if(gameObjectA.label === 'ground')
                 {
                     if(this.stateMachine.isCurrentState('jump'))
                     {
@@ -86,19 +85,6 @@ export default class PlayerController
                     return
                 }
             })
-
-            if(this.hook)
-            {
-                this.hook.setOnCollide((data: MatterJS.ICollisionPair) => {
-                    const bodyA = data.bodyA as MatterJS.BodyType
-                    const bodyB = data.bodyB as MatterJS.BodyType
-                    const gameObjectA = bodyA.gameObject
-                    const gameObjectB = bodyB.gameObject
-    
-                    console.log(gameObjectA)
-                    console.log(gameObjectB)
-                })
-            }
 
             this.scene.input.on("pointerdown", this.fireHook, this)
             
@@ -205,7 +191,6 @@ export default class PlayerController
     private walkOnExit()
     {
     }
-
     private jumpOnEnter()
     {
         this.smoke.createEmitter({
@@ -251,6 +236,10 @@ export default class PlayerController
 
     private grappleOnUpdate()
     {
+        if(this.keySpace.isDown)
+        {
+            this.releaseHook()
+        }
         this.scene.matter.world.on("collisionstart", (e, b1, b2)=>{
             if((b1.label == 'HOOK') || (b2.label == 'HOOK') && !this.rope && this.hook)
             {
@@ -309,7 +298,9 @@ export default class PlayerController
             this.stateMachine.setState('grapple')
             let angle = Phaser.Math.Angle.Between(this.sprite.x, this.sprite.y, e.worldX, e.worldY)
 
-            this.hook = this.scene.matter.add.rectangle(this.sprite.x+(16*2)*Math.cos(angle), this.sprite.y+(16*2)*Math.sin(angle), 5, 5)
+            this.hook = this.scene.matter.add.rectangle(this.sprite.x+(16*2)*Math.cos(angle), this.sprite.y+(16*2)*Math.sin(angle), 5, 5, {
+                ignoreGravity:true
+            })
             this.hook.label = 'HOOK'
 
 
