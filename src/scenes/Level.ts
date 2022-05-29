@@ -89,18 +89,19 @@ export default class Level extends Phaser.Scene
                 {   
                     this.elijah = this.matter.add.sprite(x, y, 'Elijah', 0, {label: 'Elijah'})
                         .setData('type', 'Elijah')
-                        .setBody({
+                    this.elijah.setBody({
                             width:16,
                             height:17
                         })
                     this.elijah.setFixedRotation()
+                    this.elijah.setFriction(1)
                     
                     
                     let smoke = this.add.particles('smoke')
                     this.elijahController = new ElijahController(this, this.elijah, smoke)
 
 
-                    //this.cameras.main.startFollow(this.elijah, false, 0.1, 0.1)
+                    this.cameras.main.startFollow(this.elijah, false, 0.1, 0.1)
                     break
                 }
             }
