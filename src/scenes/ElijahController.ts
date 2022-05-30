@@ -228,7 +228,8 @@ export default class PlayerController
             scale:{start:1, end:0.1},
             follow:{x:this.sprite.x, y:this.sprite.y+8},
             maxParticles: 10,
-            angle:{min:180, max:360}
+            angle:{min:180, max:360},
+            
             //deathZone: {type: 'onEnter', source: this.ground},
 
         })
