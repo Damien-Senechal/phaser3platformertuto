@@ -42,6 +42,7 @@ export default class Level extends Phaser.Scene
 
     create()
     {
+        this.scene.launch('interface')
         /*this.elijah = this.matter.add.sprite(200, 200, 'Elijah')
         this.cameras.main.startFollow(this.elijah)
         this.load.image('tiles', 'assets/sheet.png')*/
@@ -125,6 +126,6 @@ export default class Level extends Phaser.Scene
         {
             this.cameras.main.stopFollow()
         }
-        console.log(this.elijah.x)
+        //console.log(this.elijah.x)
     }
 }
