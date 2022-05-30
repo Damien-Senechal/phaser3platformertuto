@@ -50,6 +50,11 @@ export default class Level extends Phaser.Scene
         const tileset = map.addTilesetImage('tile_desert3', 'tiles')
 
         const ground = map.createLayer('ground', tileset)
+        ground.setDepth(0)
+        const decors1 = map.createLayer('decors', tileset)
+        decors1.setDepth(1)
+        const decors2 = map.createLayer('decors2', tileset)
+        decors2.setDepth(2)
         //ground.setCollisionByProperty({ collides: true })
 
         //map.createLayer('obstacles', tileset)
@@ -116,5 +121,10 @@ export default class Level extends Phaser.Scene
     update(t: number, dt: number)
     {
         this.elijahController?.update(dt)
+        if(this.elijah.x>2700)
+        {
+            this.cameras.main.stopFollow()
+        }
+        console.log(this.elijah.x)
     }
 }
