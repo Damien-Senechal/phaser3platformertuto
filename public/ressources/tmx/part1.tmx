@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.1" orientation="orthogonal" renderorder="right-down" width="200" height="25" tilewidth="16" tileheight="16" infinite="1" nextlayerid="7" nextobjectid="49">
+<map version="1.8" tiledversion="1.8.1" orientation="orthogonal" renderorder="right-down" width="200" height="25" tilewidth="16" tileheight="16" infinite="1" nextlayerid="7" nextobjectid="50">
  <editorsettings>
   <export target="../json/part1.json" format="json"/>
  </editorsettings>
@@ -668,8 +668,7 @@
   <object id="26" name="Ground" x="2176" y="96" width="64" height="16"/>
   <object id="27" name="Ground" x="2240" y="64" width="208" height="16"/>
   <object id="28" name="Wall" x="2432" y="80" width="16" height="320"/>
-  <object id="29" name="Ground" x="2448" y="288" width="192" height="16"/>
-  <object id="31" name="Ground" x="2640" y="288" width="560" height="16"/>
+  <object id="31" name="Ground" x="2448" y="288" width="752" height="16"/>
   <object id="32" name="Wall" x="1872" y="240" width="16" height="160"/>
   <object id="33" name="Wall" x="2032" y="240" width="16" height="160"/>
   <object id="34" name="Ground" x="1888" y="384" width="144" height="16"/>

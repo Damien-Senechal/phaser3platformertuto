@@ -524,24 +524,13 @@
                 }, 
                 {
                  "height":16,
-                 "id":29,
-                 "name":"Ground",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":192,
-                 "x":2448,
-                 "y":288
-                }, 
-                {
-                 "height":16,
                  "id":31,
                  "name":"Ground",
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":560,
-                 "x":2640,
+                 "width":752,
+                 "x":2448,
                  "y":288
                 }, 
                 {
@@ -728,7 +717,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":49,
+ "nextobjectid":50,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.1",

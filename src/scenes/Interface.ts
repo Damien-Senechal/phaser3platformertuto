@@ -23,6 +23,7 @@ export default class UI extends Phaser.Scene
     preload()
     {
         this.load.spritesheet('Elijah-Portrait', 'ressources/sprite/Elijah_portrait_idle-Sheet.png', { frameWidth: 32, frameHeight: 32 });
+        this.load.image('bullet-icon', 'ressources/sprite/bullet_icon.png')
     }
 
     create()
@@ -35,17 +36,17 @@ export default class UI extends Phaser.Scene
         });
 
         this.graphics = this.add.graphics()
-        this.setHealthBar(100)
+        this.setInterface(100, 100, 10)
         this.add.sprite(26, 25, 'Elijah-Portrait').play('idle-portrait')
     }
 
 
 
-    private setHealthBar(value: number)
+    private setInterface(health: number, stamina: number, bullets: number)
     {
         const width = 100
-        const percent = Phaser.Math.Clamp(value, 0, 100) / 100
-        const percent2 = Phaser.Math.Clamp(value, 0, 100) / 100
+        const percent = Phaser.Math.Clamp(health, 0, 100) / 100
+        const percent2 = Phaser.Math.Clamp(stamina, 0, 100) / 100
 
 
 
@@ -71,6 +72,10 @@ export default class UI extends Phaser.Scene
         {
             this.graphics.fillStyle(0xf4b41b)
             this.graphics.fillRoundedRect(50, 21, width*percent, 7, 5)
+        }
+
+        for (let i = 0; i < bullets; i++) {
+            this.add.image(54+i*10, 36, 'bullet-icon').setScale(2)
         }
 
 
