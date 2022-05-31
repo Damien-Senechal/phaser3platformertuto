@@ -48,6 +48,11 @@ export default class PlayerController
             .addState('snowman-stomp', {
                 onEnter: this.snowmanStompOnEnter
             })
+            .addState('dead', {
+                onEnter: this.deadOnEnter,
+                onUpdate: this.deadOnUpdate,
+                onExit: this.deadOnExit
+            })
             .setState('idle')
 
             this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
@@ -121,6 +126,11 @@ export default class PlayerController
         this.health = Phaser.Math.Clamp(value - 10, 0, 100)
 
         events.emit('health-changed', this.health)
+
+        if(this.health <= 0)
+        {
+            this.stateMachine.setState('dead')
+        }
     }
 
     private idleOnEnter()
@@ -291,6 +301,21 @@ export default class PlayerController
         events.emit('snowman-stomped', this.lastSnowman)
 
         this.stateMachine.setState('idle')
+    }
+
+    private deadOnEnter()
+    {
+
+    }
+
+    private deadOnUpdate()
+    {
+
+    }
+
+    private deadOnExit()
+    {
+        
     }
 
     private createAnimations()

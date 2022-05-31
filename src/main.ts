@@ -12,7 +12,7 @@ const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
 	width: 600,
 	height: 300,
-	zoom:3,
+	zoom:1, // 3
 	pixelArt: true,
 	backgroundColor: '#ffe0bb',
 	fps: {
@@ -27,8 +27,8 @@ const config: Phaser.Types.Core.GameConfig = {
 			
 		}
 	},
-	//scene: [Game, UI]
-	scene: [Level, Interface]
+	scene: [Game, UI]
+	//scene: [Level, Interface]
 }
 
 export default new Phaser.Game(config)
