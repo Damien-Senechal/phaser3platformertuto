@@ -116,6 +116,13 @@ export default class PlayerController
         this.stateMachine.update(dt)
     }
 
+    private setHealth(value: number)
+    {
+        this.health = Phaser.Math.Clamp(value - 10, 0, 100)
+
+        events.emit('health-changed', this.health)
+    }
+
     private idleOnEnter()
     {
         this.sprite.play('player-idle')
@@ -191,9 +198,7 @@ export default class PlayerController
     private spikeHitOnEnter()
     {
         this.sprite.setVelocityY(-12)
-        this.health = Phaser.Math.Clamp(this.health-10, 0, 100)
-
-        events.emit('health-changed', this.health)
+        this.setHealth(this.health-10)
 
         const startColor = Phaser.Display.Color.ValueToColor(0xffffff)
         const endColor = Phaser.Display.Color.ValueToColor(0xff0000)
@@ -245,9 +250,7 @@ export default class PlayerController
             this.sprite.setVelocityY(-20)
         }
 
-        this.health = Phaser.Math.Clamp(this.health-10, 0, 100)
-
-        events.emit('health-changed', this.health)
+        this.setHealth(this.health - 25)
 
         const startColor = Phaser.Display.Color.ValueToColor(0xffffff)
         const endColor = Phaser.Display.Color.ValueToColor(0x0000ff)
@@ -308,6 +311,17 @@ export default class PlayerController
                 suffix: '.png'
             }),
             repeat: -1
+        })
+
+        this.sprite.anims.create({
+            key: 'player-death',
+            frameRate: 10,
+            frames: this.sprite.anims.generateFrameNames('penguin', {
+                start: 1,
+                end: 4,
+                prefix: 'penguin_die0',
+                suffix: '.png',
+            }),
         })
     }
 }
