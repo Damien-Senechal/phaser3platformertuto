@@ -240,6 +240,8 @@ export default class PlayerController
         })
 
         this.stateMachine.setState('idle')
+
+        this.setHealth(this.health - 100)
     }
 
     private snowmanHitOnEnter()
@@ -259,8 +261,6 @@ export default class PlayerController
         {
             this.sprite.setVelocityY(-20)
         }
-
-        this.setHealth(this.health - 25)
 
         const startColor = Phaser.Display.Color.ValueToColor(0xffffff)
         const endColor = Phaser.Display.Color.ValueToColor(0x0000ff)
@@ -292,6 +292,8 @@ export default class PlayerController
         })
 
         this.stateMachine.setState('idle')
+
+        this.setHealth(this.health - 25)
     }
 
     private snowmanStompOnEnter()
@@ -305,6 +307,14 @@ export default class PlayerController
 
     private deadOnEnter()
     {
+
+        this.sprite.play('player-death')
+
+        this.sprite.setOnCollide(() => {})
+
+        this.scene.time.delayedCall(1500, () => {
+            this.scene.scene.start('game-over')
+        })
 
     }
 

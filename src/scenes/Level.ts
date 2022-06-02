@@ -7,7 +7,7 @@ import LoadRessources from './LoadRessources'
 export default class Level extends Phaser.Scene
 {
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
-    private elijah?: Phaser.Physics.Matter.Sprite
+    private elijah!: Phaser.Physics.Matter.Sprite
     private elijahController?: ElijahController
     private screenHeight
     private screenWidth
