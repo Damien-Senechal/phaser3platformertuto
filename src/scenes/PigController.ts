@@ -11,6 +11,7 @@ export default class PigController
     private stateMachine: StateMachine
     private ennemies: EnnemiesController
     private target
+    private alive = true
 
     private moveTime = 0
     private speed = 1
@@ -35,7 +36,8 @@ export default class PigController
             label: 'pig'
         })
         pigController.sensors.center = this.scene.matter.bodies.rectangle(sprite.x, sprite.y, 200, 10, {
-            isSensor:true
+            isSensor:true,
+            label: 'detection-zone'
         })
         const compoudPig = this.scene.matter.body.create({
             parts:[pigBody, pigController.sensors.center ]
@@ -68,12 +70,12 @@ export default class PigController
         })
         .setState('idle')
 
-        this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
+        /*pigController.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
             const bodyB = data.bodyB as MatterJS.BodyType
             const bodyA = data.bodyA as MatterJS.BodyType
 
-            //console.log(bodyA)
-            //console.log(bodyB)
+            console.log('lol')
+            console.log(bodyB.label)
 
             if(bodyA.label === 'corner' || bodyB.label === 'corner')
             {
@@ -95,40 +97,65 @@ export default class PigController
                 this.stateMachine.setState('dead')
                 return
             }
-        })
+        })*/
 
-        this.scene.matter.world.on('collisionstart', (event, bodyA, bodyB) => {
-            console.log(bodyA.label)
-            if(bodyA.label==='Elijah' && bodyB === pigController.sensors.center){
-                this.stateMachine.setState('attack')
-                this.target.x = bodyA.position.x
-                this.target.y = bodyA.position.y
-            }
-            if(bodyA.label==='Elijah' && bodyB.label === 'pig'){
-                this.target.x = bodyA.position.x
-                this.target.y = bodyA.position.y
-                this.stateMachine.setState('back')
-            }
-        })
+        this.scene.matter.world.on('collisionstart', (event, b1, b2) => {
+            for (var i = 0; i < event.pairs.length; i++) {
+    
+                if(b2.label === 'corner' && b1.label === 'pig')
+                {
+                    if(this.stateMachine.isCurrentState('move-left'))
+                    {   
+                        this.moveTime = 0
+                        this.stateMachine.setState('move-right')
+                    }
+                    else if(this.stateMachine.isCurrentState('move-right'))
+                    {
+                        this.moveTime = 0
+                        this.stateMachine.setState('move-left')
+                    }
+                    return
+                }
+                if(b2.label === 'hitbox-attack' && b1.label === 'pig')
+                {
+                    this.alive = false
+                    this.stateMachine.setState('dead')
+                    return
+                }
 
-        this.scene.matter.world.on('collisionend', (event, bodyA, bodyB) => {
-            if(bodyA.label==='Elijah' && bodyB === pigController.sensors.center){
-                this.stateMachine.setState('idle')
+                if(b1.label==='Elijah' && b2 === pigController.sensors.center){
+                    this.stateMachine.setState('attack')
+                    this.target.x = b1.position.x
+                    this.target.y = b1.position.y
+                    return
+                }
+                if(b1.label==='Elijah' && b2.label === 'pig'){
+                    this.target.x = b1.position.x
+                    this.target.y = b1.position.y
+                    this.stateMachine.setState('back')
+                    return
+                }
             }
-            if(bodyA.label==='Elijah' && bodyB.label === 'pig'){
-                this.target.x = bodyA.position.x
-                this.target.y = bodyA.position.y
-                this.stateMachine.setState('back')
-            }
-        })
+        }, this);
 
-        //TO DO attack event
-        //events.on('snowman-stomped', this.handleStomped, this)
+        this.scene.matter.world.on('collisionend', (event, b1, b2) => {
+            for (var i = 0; i < event.pairs.length; i++) {
+                if(b1.label==='Elijah' && b2 === pigController.sensors.center && this.alive){
+                    this.stateMachine.setState('idle')
+                    return
+                }
+                if(b1.label==='Elijah' && b2.label === 'pig' && this.alive){
+                    this.target.x = b1.position.x
+                    this.target.y = b1.position.y
+                    this.stateMachine.setState('back')
+                    return
+                }
+            }
+        }, this)
     }
 
     destroy()
     {
-        //events.off('snowman-stomped', this.handleStomped, this)
     }
 
     update(dt: number)
@@ -191,23 +218,28 @@ export default class PigController
 
     private deadOnEnter()
     {
+        this.alive = false
         this.sprite.destroy()
     }
 
     private attackOnUpdate()
     {
-        if(this.sprite.x < this.target.x)
+        if(this.alive)
         {
-            this.sprite.setVelocityX(this.speed+2)
+            if(this.sprite.x < this.target.x)
+            {
+                this.sprite.setVelocityX(this.speed+1)
+            }
+            else if(this.sprite.x > this.target.x)
+            {
+                this.sprite.setVelocityX((this.speed+1)*-1)
+            }
+            else
+            {
+                this.sprite.setVelocityX(0)
+            }
         }
-        else if(this.sprite.x > this.target.x)
-        {
-            this.sprite.setVelocityX((this.speed+2)*-1)
-        }
-        else
-        {
-            this.sprite.setVelocityX(0)
-        }
+        
     }
 
     private backOnUpdate()

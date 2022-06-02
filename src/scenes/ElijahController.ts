@@ -26,6 +26,7 @@ export default class PlayerController
     private activeWeapon
     private activeWeaponSelection
     private lastPig
+    private hitbox
 
     constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke, ennemies: EnnemiesController)
     {
@@ -99,7 +100,7 @@ export default class PlayerController
                 const gameObjectA = bodyA
                 const gameObjectB = bodyB
 
-                console.log(bodyB.label)
+                //console.log(bodyB.label)
 
                 //dconsole.log(gameObjectA)
                 //console.log(gameObjectB)
@@ -130,6 +131,10 @@ export default class PlayerController
                     }            
                     return
                 }
+            })
+
+            this.scene.matter.world.on('collisionstart', (event, bodyA, bodyB) => {
+                
             })
 
             this.scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
@@ -412,10 +417,9 @@ export default class PlayerController
 
     private attackOnEnter()
     {
-        let hitbox
         if(this.sprite.flipX)
                 {
-                    hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x-10, this.sprite.body.position.y, 32, 16, {
+                    this.hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x-22, this.sprite.body.position.y-2, 32, 16, {
                         isSensor:true,
                         isStatic: false,
                         ignoreGravity: true,
@@ -423,18 +427,19 @@ export default class PlayerController
                     })
                 }
                 else{
-                    hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x+10, this.sprite.body.position.y, 32, 16, {
+                    this.hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x+22, this.sprite.body.position.y-2, 32, 16, {
                         isSensor:true,
                         isStatic: false,
                         ignoreGravity: true,
                         label:'hitbox-attack'
                     })
                 }
-        this.scene.time.delayedCall(100, () => {
-            this.scene.matter.world.remove(hitbox);
-        })
-
+        this.sprite.setStatic(true)
         this.stateMachine.setState('idle')
+        this.scene.time.delayedCall(100, () => {
+            this.scene.matter.world.remove(this.hitbox);
+            this.sprite.setStatic(false)
+        })
     }
 
     private attackOnUpdate()
