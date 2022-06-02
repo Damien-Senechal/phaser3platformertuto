@@ -109,8 +109,8 @@
 </data>
  </layer>
  <objectgroup id="4" name="objects">
-  <object id="36" name="Elijah_spawn" x="432" y="240" width="16" height="16"/>
-  <object id="51" name="Pig" x="832" y="464"/>
+  <object id="36" name="Elijah_spawn" x="752" y="400" width="16" height="16"/>
+  <object id="51" name="Pig" x="880" y="464"/>
   <object id="58" name="Corner" x="2240" y="288" width="16" height="16"/>
   <object id="59" name="Corner" x="2432" y="288" width="16" height="16"/>
   <object id="60" name="Corner" x="1648" y="496" width="16" height="16"/>

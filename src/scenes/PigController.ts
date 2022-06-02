@@ -2,6 +2,7 @@ import {Events} from 'matter'
 import StateMachine from '~/statemachine/StateMachine'
 import { sharedInstance as events } from './EventCenter'
 import EnnemiesController from './EnnemiesController'
+import * as MatterJS from 'matter-js'
 
 export default class PigController
 {
@@ -9,17 +10,39 @@ export default class PigController
     private sprite: Phaser.Physics.Matter.Sprite
     private stateMachine: StateMachine
     private ennemies: EnnemiesController
+    private target
 
     private moveTime = 0
     private speed = 1
 
-    constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, ennemies: EnnemiesController)
+    constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, ennemies: EnnemiesController, target: Phaser.Physics.Matter.Sprite)
     {
         this.scene = scene
         this.sprite = sprite
         this.ennemies = ennemies
+        this.target = target
 
         //this.createAnimations()
+
+        const pigController = {
+            sprite,
+            sensors: {
+                center: MatterJS.BodyType
+            }
+        }
+        const pigBody = this.scene.matter.bodies.rectangle(sprite.x, sprite.y, 16, 16, {
+            isSensor: false,
+            label: 'pig'
+        })
+        pigController.sensors.center = this.scene.matter.bodies.rectangle(sprite.x, sprite.y, 200, 10, {
+            isSensor:true
+        })
+        const compoudPig = this.scene.matter.body.create({
+            parts:[pigBody, pigController.sensors.center ]
+        })
+        pigController.sprite.setExistingBody(compoudPig)
+        pigController.sprite.setFixedRotation()
+        //qpigController.sprite.setStatic(true)
 
         this.stateMachine = new StateMachine(this, 'pig')
 
@@ -36,6 +59,12 @@ export default class PigController
         })
         .addState('dead', {
             onEnter: this.deadOnEnter
+        })
+        .addState('attack', {
+            onUpdate: this.attackOnUpdate
+        })
+        .addState('back', {
+            onUpdate: this.backOnUpdate
         })
         .setState('idle')
 
@@ -65,6 +94,31 @@ export default class PigController
             {
                 this.stateMachine.setState('dead')
                 return
+            }
+        })
+
+        this.scene.matter.world.on('collisionstart', (event, bodyA, bodyB) => {
+            console.log(bodyA.label)
+            if(bodyA.label==='Elijah' && bodyB === pigController.sensors.center){
+                this.stateMachine.setState('attack')
+                this.target.x = bodyA.position.x
+                this.target.y = bodyA.position.y
+            }
+            if(bodyA.label==='Elijah' && bodyB.label === 'pig'){
+                this.target.x = bodyA.position.x
+                this.target.y = bodyA.position.y
+                this.stateMachine.setState('back')
+            }
+        })
+
+        this.scene.matter.world.on('collisionend', (event, bodyA, bodyB) => {
+            if(bodyA.label==='Elijah' && bodyB === pigController.sensors.center){
+                this.stateMachine.setState('idle')
+            }
+            if(bodyA.label==='Elijah' && bodyB.label === 'pig'){
+                this.target.x = bodyA.position.x
+                this.target.y = bodyA.position.y
+                this.stateMachine.setState('back')
             }
         })
 
@@ -138,5 +192,42 @@ export default class PigController
     private deadOnEnter()
     {
         this.sprite.destroy()
+    }
+
+    private attackOnUpdate()
+    {
+        if(this.sprite.x < this.target.x)
+        {
+            this.sprite.setVelocityX(this.speed+2)
+        }
+        else if(this.sprite.x > this.target.x)
+        {
+            this.sprite.setVelocityX((this.speed+2)*-1)
+        }
+        else
+        {
+            this.sprite.setVelocityX(0)
+        }
+    }
+
+    private backOnUpdate()
+    {
+        if(this.sprite.x < this.target.x)
+        {
+            this.sprite.setVelocityX((this.speed)*-1)
+            this.scene.time.delayedCall(1000, () => {
+                this.stateMachine.setState('attack')
+            })
+        }
+        else if(this.sprite.x > this.target.x)
+        {
+            this.sprite.setVelocityX(this.speed)
+            this.scene.time.delayedCall(1000, () => {
+                this.stateMachine.setState('attack')
+            })
+        }
+        else{
+            this.stateMachine.setState('idle')
+        } 
     }
 }

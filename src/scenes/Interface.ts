@@ -66,8 +66,8 @@ export default class UI extends Phaser.Scene
 
         this.graphics.fillStyle(0x472d3c)
         this.graphics.fillRoundedRect(9, 9, 34, 34, 8)
-
-        this.graphics.fillStyle(0xf4cca1)
+        
+        this.graphics.fillStyle(0x5e3643)
         this.graphics.fillRoundedRect(11, 11, 30, 30, 8)
 
         this.graphics.fillStyle(0x472d3c)

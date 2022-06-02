@@ -25,7 +25,7 @@ export default class PlayerController
     private canFireHook
     private activeWeapon
     private activeWeaponSelection
-    private hitbox
+    private lastPig
 
     constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke, ennemies: EnnemiesController)
     {
@@ -88,13 +88,18 @@ export default class PlayerController
                 onUpdate: this.attackOnUpdate,
                 onExit: this.attackOnExit
             })
+            .addState('pig-hit', {
+                onEnter: this.pigOnEnter
+            })
             .setState('falling')
 
             this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
                 const bodyA = data.bodyA as MatterJS.BodyType
                 const bodyB = data.bodyB as MatterJS.BodyType
                 const gameObjectA = bodyA
-                const gameObjectB = bodyB.gameObject
+                const gameObjectB = bodyB
+
+                console.log(bodyB.label)
 
                 //dconsole.log(gameObjectA)
                 //console.log(gameObjectB)
@@ -102,6 +107,12 @@ export default class PlayerController
                 if(!gameObjectA)
                 {
                     return
+                }
+
+                if(bodyB.label === 'pig')
+                {
+                    this.lastPig = bodyB.gameObject
+                    this.stateMachine.setState('pig-hit')
                 }
 
                 if(gameObjectA.label === 'ground' || gameObjectA.label === 'corner')
@@ -412,7 +423,7 @@ export default class PlayerController
                     })
                 }
                 else{
-                    hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x+20, this.sprite.body.position.y, 32, 16, {
+                    hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x+10, this.sprite.body.position.y, 32, 16, {
                         isSensor:true,
                         isStatic: false,
                         ignoreGravity: true,
@@ -434,6 +445,60 @@ export default class PlayerController
     private attackOnExit()
     {
 
+    }
+
+    private pigOnEnter()
+    {
+        if(this.lastPig)
+        {
+            if(this.sprite.x < this.lastPig.x)
+            {
+                this.sprite.setVelocityX(-10)
+                this.sprite.setVelocityY(-2)
+            }
+            else
+            {
+                this.sprite.setVelocityX(10)
+                this.sprite.setVelocityY(-2)
+            }
+        }
+        else
+        {
+            this.sprite.setVelocityY(-20)
+        }
+
+        const startColor = Phaser.Display.Color.ValueToColor(0xffffff)
+        const endColor = Phaser.Display.Color.ValueToColor(0x0000ff)
+
+        this.scene.tweens.addCounter({
+            from:0,
+            to:100,
+            duration:100,
+            repeat:2,
+            yoyo:true,
+            ease: Phaser.Math.Easing.Sine.InOut,
+            onUpdate: tween => {
+                const value = tween.getValue()
+                const colorObject = Phaser.Display.Color.Interpolate.ColorWithColor(
+                    startColor, 
+                    endColor,
+                    100,
+                    value
+                )
+
+                const color = Phaser.Display.Color.GetColor(
+                    colorObject.r,
+                    colorObject.g,
+                    colorObject.b
+                )
+
+                this.sprite.setTint(color)
+            }
+        })
+
+        this.stateMachine.setState('idle')
+
+        //this.setHealth(this.health - 25)
     }
 
     private inputManager()

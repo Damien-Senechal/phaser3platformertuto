@@ -107,7 +107,9 @@ export default class Level extends Phaser.Scene
                         .setData('type', 'Elijah')
                     this.elijah.setBody({
                             width:11,
-                            height:13
+                            height:13,
+                        }, {
+                            label: 'Elijah',
                         })
                     this.elijah.setFixedRotation()
                     this.elijah.setFriction(1)
@@ -119,10 +121,11 @@ export default class Level extends Phaser.Scene
                 }
                 case 'Pig':
                 {
-                    const pig = this.matter.add.sprite(x, y, 'Pig')
+                    let pig = this.matter.add.sprite(x, y, 'Pig', 0)
                         .setFixedRotation()
+                    pig.setFixedRotation()
 
-                    this.pigs.push(new PigController(this, pig, this.ennemies))
+                    this.pigs.push(new PigController(this, pig, this.ennemies, this.elijah))
                     this.ennemies.add('pig', pig.body as MatterJS.BodyType)
                     break
                 }

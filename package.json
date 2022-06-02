@@ -26,6 +26,7 @@
 	},
 	"dependencies": {
 		"matter": "^0.2.0",
+		"matter-js": "^0.18.0",
 		"phaser": "^3.55.2"
 	},
 	"parcelCleanPaths": [
