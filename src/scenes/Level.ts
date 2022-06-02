@@ -106,38 +106,18 @@ export default class Level extends Phaser.Scene
                     this.elijah = this.matter.add.sprite(x, y, 'Elijah', 0, {label: 'Elijah', isStatic:true})
                         .setData('type', 'Elijah')
                     this.elijah.setBody({
-                            width:16,
-                            height:17,
+                            width:11,
+                            height:13
                         })
                     this.elijah.setFixedRotation()
                     this.elijah.setFriction(1)
-
-                    /*this.up = this.matter.add.rectangle(0,0,5,5, {
-                        isSensor: true,
-                        ignoreGravity:true,
-                    })
-
-                    this.down = this.matter.add.rectangle(0,0,5,5, {
-                        isSensor: true,
-                        ignoreGravity:true
-                    })
-
-                    this.left = this.matter.add.rectangle(0,0,5,5, {
-                        isSensor: true,
-                        ignoreGravity:true
-                    })
-
-                    this.right = this.matter.add.rectangle(0,0,5,5, {
-                        isSensor: true,
-                        ignoreGravity:true
-                    })*/
-                    
+                
                     let smoke = this.add.particles('smoke')
                     this.elijahController = new ElijahController(this, this.elijah, smoke, this.ennemies)
                     this.cameras.main.startFollow(this.elijah, true, 0.1, 0.1)
                     break
                 }
-                /*case 'Pig':
+                case 'Pig':
                 {
                     const pig = this.matter.add.sprite(x, y, 'Pig')
                         .setFixedRotation()
@@ -156,7 +136,7 @@ export default class Level extends Phaser.Scene
                     })
                     this.ennemies.add('corner', corner)
                     break
-                }*/
+                }
             }
         })
     }

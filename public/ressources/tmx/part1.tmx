@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="200" height="25" tilewidth="16" tileheight="16" infinite="1" nextlayerid="7" nextobjectid="70">
+<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="200" height="25" tilewidth="16" tileheight="16" infinite="1" nextlayerid="7" nextobjectid="78">
  <editorsettings>
   <export target="../json/part1.json" format="json"/>
  </editorsettings>
@@ -8,6 +8,24 @@
  </tileset>
  <layer id="1" name="ground" width="200" height="25">
   <data encoding="csv">
+   <chunk x="128" y="-16" width="16" height="16">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+155,159,159,159,159,159,159,159,159,159,159,160,0,0,0,0,
+155,159,159,159,159,159,159,159,159,159,159,160,0,0,0,0,
+155,159,159,159,159,159,159,159,159,159,159,160,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</chunk>
    <chunk x="0" y="0" width="16" height="16">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -645,7 +663,7 @@
   </data>
  </layer>
  <objectgroup id="4" name="objects">
-  <object id="36" name="Elijah_spawn" x="480" y="16" width="16" height="16"/>
+  <object id="36" name="Elijah_spawn" x="432" y="0" width="16" height="16"/>
   <object id="51" name="Pig" x="832" y="224"/>
   <object id="58" name="Corner" x="2240" y="48" width="16" height="16"/>
   <object id="59" name="Corner" x="2432" y="48" width="16" height="16"/>
@@ -657,7 +675,7 @@
   <object id="67" name="Pig" x="2337.33" y="20"/>
   <object id="68" name="Pig" x="2560" y="224"/>
  </objectgroup>
- <objectgroup id="3" name="collisions" visible="0">
+ <objectgroup id="3" name="collisions">
   <object id="1" name="Ground" x="176" y="80" width="384" height="16"/>
   <object id="2" name="Wall" x="544" y="96" width="16" height="304"/>
   <object id="4" name="Ground" x="560" y="240" width="112" height="160"/>
@@ -687,10 +705,13 @@
   <object id="40" name="Ground" x="1520" y="272" width="144" height="48"/>
   <object id="41" name="Ground" x="1696" y="256" width="32" height="32"/>
   <object id="42" name="Ground" x="1760" y="240" width="48" height="32"/>
-  <object id="43" name="Ground" x="2048" y="0" width="32" height="64"/>
-  <object id="44" name="Ground" x="2080" y="0" width="160" height="16"/>
+  <object id="43" name="Ground" x="2048" y="-240" width="32" height="304"/>
+  <object id="44" name="Ground" x="2080" y="-240" width="160" height="256"/>
   <object id="46" name="Ground" x="1264" y="320" width="16" height="192"/>
   <object id="50" x="176" y="96" width="368" height="304"/>
+  <object id="75" name="Wall" x="0" y="-256" width="3328" height="16"/>
+  <object id="76" name="Wall" x="3200" y="-240" width="16" height="752"/>
+  <object id="77" name="Wall" x="160" y="-240" width="16" height="752"/>
  </objectgroup>
  <layer id="6" name="decors2" width="200" height="25">
   <data encoding="csv">

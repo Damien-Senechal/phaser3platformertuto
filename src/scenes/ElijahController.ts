@@ -21,6 +21,7 @@ export default class PlayerController
     private smoke
     private isGrounded
     private refY
+    private canFireHook
 
     constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke, ennemies: EnnemiesController)
     {
@@ -31,6 +32,7 @@ export default class PlayerController
         this.ennemies = ennemies
         this.isGrounded = false
         this.refY=0
+        this.canFireHook = true
 
         this.inputManager()
         this.createAnimations()
@@ -100,8 +102,8 @@ export default class PlayerController
                 }
             })
 
-            this.scene.input.on("pointerdown", this.fireHook, this)
             
+            this.scene.input.on("pointerdown", this.fireHook, this)
     }
 
     update(dt: number)
@@ -121,9 +123,10 @@ export default class PlayerController
 
         //console.log("this.sprite.y : "+this.sprite.body.velocity.y)
         //console.log("this.yPos : "+this.yPos)
-        console.log('this.sprite.y = '+this.sprite.y)
-        console.log('refY = '+this.refY)
-    }d
+        //console.log('this.sprite.y = '+this.sprite.y)
+        //console.log('refY = '+this.refY)
+        console.log(this.canFireHook)
+    }
 
 
     private idleOnEnter()
@@ -134,7 +137,7 @@ export default class PlayerController
         }
         this.sprite.play('idle')
     }
- d
+
     private idleOnUpdate()
     {
         this.refY = this.sprite.y
@@ -192,7 +195,7 @@ export default class PlayerController
     {
         const speed = 2.5
 
-        if(this.sprite.body.velocity.y > 0 && this.isGrounded && (this.refY+.5 < this.sprite.y || this.refY-.5 > this.sprite.y)
+        if(this.sprite.body.velocity.y > 0 && this.isGrounded && (this.refY+.5 < this.sprite.y || this.refY-.5 > this.sprite.y))
         {
             this.isGrounded = false
             this.stateMachine.setState('falling')
@@ -285,15 +288,16 @@ export default class PlayerController
             if((b1.label == 'HOOK') || (b2.label == 'HOOK') && !this.rope && this.hook)
             {
                 this.scene.matter.body.setStatic(this.hook, true)
+                
 
                 let distance = Phaser.Math.Distance.Between(this.sprite.x, this.sprite.y, this.hook.position.x, this.hook.position.y)
-
-                if(distance > 16*2 && distance < 300)
+                console.log(distance)
+                if(distance > 16*2 && distance < 200)
                 {
-                    
                     this.rope = this.scene.matter.add.constraint(this.sprite.body as BodyType, this.hook, distance, 0)
                 }
                 else{
+                    this.canFireHook = true
                     this.releaseHook();
                 }
             }
@@ -344,7 +348,7 @@ export default class PlayerController
             this.sprite.flipX = false
             this.sprite.setVelocityX(speed)
         }
-    }d
+    }
 
     private fallingOnExit()
     {
@@ -361,26 +365,28 @@ export default class PlayerController
 
     private fireHook(e)
     {
-        if(this.hook)
+        if(this.rope)
         {
             //destroy the current constraint
             this.releaseHook()
         }
-        else
+        if(this.canFireHook)
         {
+            this.canFireHook = false
             this.stateMachine.setState('grapple')
             let angle = Phaser.Math.Angle.Between(this.sprite.x, this.sprite.y, e.worldX, e.worldY)
-
+    
             this.hook = this.scene.matter.add.rectangle(this.sprite.x+(16*2)*Math.cos(angle), this.sprite.y+(16*2)*Math.sin(angle), 5, 5, {
                 ignoreGravity:true
             })
             this.hook.label = 'HOOK'
-
-
+    
+    
             this.scene.matter.body.setVelocity(this.hook,{
                 x: 10* Math.cos(angle),
                 y: 10* Math.sin(angle)
             })
+            //this.scene.cameras.main.startFollow(this.hook, true, 0.1, 0.1)
             //console.log(angle)
         }
     }
@@ -390,6 +396,7 @@ export default class PlayerController
         //is there a constraint? remove it
         if(this.rope)
         {
+            this.canFireHook = true
             this.scene.matter.world.removeConstraint(this.rope)
             this.rope = null
         }
