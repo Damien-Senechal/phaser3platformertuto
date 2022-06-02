@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="200" height="25" tilewidth="16" tileheight="16" infinite="1" nextlayerid="7" nextobjectid="51">
+<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="200" height="25" tilewidth="16" tileheight="16" infinite="1" nextlayerid="7" nextobjectid="70">
  <editorsettings>
   <export target="../json/part1.json" format="json"/>
  </editorsettings>
@@ -250,8 +250,8 @@
 24,24,25,24,24,24,24,24,24,25,178,178,178,178,178,179,
 24,24,25,24,24,24,24,24,24,25,0,0,0,0,0,0,
 24,24,25,24,24,24,24,24,24,25,0,0,0,0,0,0,
-24,24,25,24,24,24,24,24,24,25,0,0,0,0,0,0,
 24,24,25,24,24,24,24,24,24,25,203,203,203,203,203,203,
+24,24,25,24,24,24,24,24,24,25,225,225,225,225,225,225,
 0,0,0,0,0,0,0,0,0,0,225,225,225,225,225,225,
 0,0,0,0,0,0,0,0,0,0,225,225,225,225,225,225,
 0,0,0,0,0,0,0,0,0,0,225,225,225,225,225,225,
@@ -268,8 +268,8 @@
 0,0,0,0,0,0,0,0,0,0,23,24,24,24,24,24,
 0,0,0,0,0,0,0,0,0,0,23,24,24,24,24,24,
 0,0,0,0,0,0,0,0,0,0,23,24,24,24,24,24,
-0,0,0,0,0,0,0,0,0,0,23,24,24,24,24,24,
 203,203,203,203,203,203,203,203,203,203,23,24,24,24,24,24,
+225,225,225,225,225,225,225,225,225,225,23,24,24,24,24,24,
 225,225,225,225,225,225,225,225,225,225,26,24,24,24,24,24,
 225,225,225,225,225,225,225,225,225,225,26,24,24,24,24,24,
 225,225,225,225,225,225,225,225,225,225,26,24,24,24,24,24,
@@ -645,9 +645,19 @@
   </data>
  </layer>
  <objectgroup id="4" name="objects">
-  <object id="36" name="Elijah_spawn" x="608" y="192" width="16" height="16"/>
+  <object id="36" name="Elijah_spawn" x="480" y="16" width="16" height="16"/>
+  <object id="51" name="Pig" x="832" y="224"/>
+  <object id="58" name="Corner" x="2240" y="48" width="16" height="16"/>
+  <object id="59" name="Corner" x="2432" y="48" width="16" height="16"/>
+  <object id="60" name="Corner" x="1648" y="256" width="16" height="16"/>
+  <object id="61" name="Corner" x="1520" y="256" width="16" height="16"/>
+  <object id="62" name="Corner" x="1248" y="288" width="16" height="16"/>
+  <object id="65" name="Pig" x="1184" y="272"/>
+  <object id="66" name="Pig" x="1584" y="240"/>
+  <object id="67" name="Pig" x="2337.33" y="20"/>
+  <object id="68" name="Pig" x="2560" y="224"/>
  </objectgroup>
- <objectgroup id="3" name="collisions">
+ <objectgroup id="3" name="collisions" visible="0">
   <object id="1" name="Ground" x="176" y="80" width="384" height="16"/>
   <object id="2" name="Wall" x="544" y="96" width="16" height="304"/>
   <object id="4" name="Ground" x="560" y="240" width="112" height="160"/>
@@ -666,7 +676,7 @@
   <object id="24" name="Wall" x="2240" y="80" width="16" height="16"/>
   <object id="25" name="Ground" x="2128" y="144" width="48" height="80"/>
   <object id="26" name="Ground" x="2176" y="96" width="64" height="128"/>
-  <object id="27" name="Ground" x="2240" y="64" width="208" height="160"/>
+  <object id="27" name="Ground" x="2240" y="64" width="192" height="160"/>
   <object id="28" name="Wall" x="2432" y="80" width="16" height="432"/>
   <object id="31" name="Ground" x="2448" y="288" width="752" height="224"/>
   <object id="32" name="Wall" x="1872" y="240" width="16" height="160"/>

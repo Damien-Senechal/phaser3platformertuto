@@ -1,7 +1,7 @@
 import { BodyType } from 'matter'
 import Phaser, { BlendModes } from 'phaser'
 import StateMachine from '~/statemachine/StateMachine'
-import ObstaclesController from './ObstaclesController'
+import EnnemiesController from './EnnemiesController'
 
 type CursorKeys = Phaser.Types.Input.Keyboard.CursorKeys
 
@@ -10,7 +10,7 @@ export default class PlayerController
     private scene: Phaser.Scene
     private sprite: Phaser.Physics.Matter.Sprite
     private stateMachine: StateMachine
-    //private obstacles: ObstaclesController
+    private ennemies: EnnemiesController
     private health = 100
     private keyD
     private keyQ
@@ -19,25 +19,24 @@ export default class PlayerController
     private rope
     private graphics
     private smoke
-    private ground
     private isGrounded
-    private yPos
+    private refY
 
-    constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke)
+    constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke, ennemies: EnnemiesController)
     {
         this.scene = scene
         this.sprite = sprite
         this.sprite.flipX = true
         this.smoke =  smoke
+        this.ennemies = ennemies
         this.isGrounded = false
-        //this.obstacles = obstacles
+        this.refY=0
 
         this.inputManager()
         this.createAnimations()
 
         this.hook = null
         this.rope = null
-        let me = this
 
         //this.scene.input.on("pointerdown", this.fireHook, this.scene)
 
@@ -63,7 +62,12 @@ export default class PlayerController
                 onUpdate: this.grappleOnUpdate,
                 onExit: this.grappleOnExit
             })
-            .setState('idle')
+            .addState('falling', {
+                onEnter: this.fallingOnEnter,
+                onUpdate: this.fallingOnUpdate,
+                onExit: this.fallingOnExit
+            })
+            .setState('falling')
 
             this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
                 const bodyA = data.bodyA as MatterJS.BodyType
@@ -71,24 +75,27 @@ export default class PlayerController
                 const gameObjectA = bodyA
                 const gameObjectB = bodyB.gameObject
 
-                console.log(gameObjectA)
+                //dconsole.log(gameObjectA)
+                //console.log(gameObjectB)
 
                 if(!gameObjectA)
                 {
                     return
                 }
 
-                if(gameObjectA.label === 'ground')
+                if(gameObjectA.label === 'ground' || gameObjectA.label === 'corner')
                 {
-                    if(this.stateMachine.isCurrentState('jump') || this.stateMachine.isCurrentState('walk'))
+                    
+                    this.sprite.body.velocity.y = 0
+                    if(this.stateMachine.isCurrentState('jump'))
                     {
-                        this.yPos = this.sprite.y
                         this.stateMachine.setState('idle')
                     }
-                    else if(this.stateMachine.isCurrentState('idle'))
+                    if(this.stateMachine.isCurrentState('falling'))
                     {
-                        this.stateMachine.setState('walk')
-                    }
+                        this.isGrounded = true
+                        this.stateMachine.setState('idle')
+                    }            
                     return
                 }
             })
@@ -112,25 +119,25 @@ export default class PlayerController
         }
         this.stateMachine.update(dt)
 
-        //console.log("this.sprite.y : "+this.sprite.y)
+        //console.log("this.sprite.y : "+this.sprite.body.velocity.y)
         //console.log("this.yPos : "+this.yPos)
-    }
+        console.log('this.sprite.y = '+this.sprite.y)
+        console.log('refY = '+this.refY)
+    }d
 
 
     private idleOnEnter()
     {
-        this.sprite.play('idle')
-        if(this.sprite.y > this.yPos)
+        if(this.stateMachine.previousStateName === 'falling')
         {
-            this.sprite.play('jumpDown')
+            this.sprite.setVelocityY(0)
         }
-        else{
-            this.sprite.play('idle')
-        }
+        this.sprite.play('idle')
     }
-
+ d
     private idleOnUpdate()
     {
+        this.refY = this.sprite.y
         if(this.keyD.isDown || this.keyQ.isDown)
         {
             this.stateMachine.setState('walk')
@@ -150,7 +157,6 @@ export default class PlayerController
 
     private walkOnEnter()
     {
-        this.yPos = this.sprite.y
         this.sprite.play('walk')
 
         if(this.sprite.flipX)
@@ -184,12 +190,13 @@ export default class PlayerController
 
     private walkOnUpdate()
     {
-        if(this.sprite.y > this.yPos)
-        {
-            this.sprite.play('jumpDown')
-        }
-
         const speed = 2.5
+
+        if(this.sprite.body.velocity.y > 0 && this.isGrounded && (this.refY+.5 < this.sprite.y || this.refY-.5 > this.sprite.y)
+        {
+            this.isGrounded = false
+            this.stateMachine.setState('falling')
+        }
 
         if(this.keyQ.isDown)
         {
@@ -218,6 +225,7 @@ export default class PlayerController
     }
     private jumpOnEnter()
     {
+        this.isGrounded = false
         this.sprite.play('jumpUP')
         
         this.smoke.createEmitter({
@@ -238,9 +246,9 @@ export default class PlayerController
 
     private jumpOnUpdate()
     {
-        if(this.sprite.body.velocity.y >=0)
+        if(this.sprite.body.velocity.y > 0)
         {
-            this.sprite.play('jumpDown')
+            this.stateMachine.setState('falling')
         }
         const speed = 2.5
 
@@ -259,7 +267,7 @@ export default class PlayerController
 
     private jumpOnExit()
     {
-        this.sprite.play('jumpTouch')
+
     }
 
     private grappleOnEnter()
@@ -310,6 +318,38 @@ export default class PlayerController
     private grappleOnExit()
     {
         this.graphics.clear()
+    }
+
+    private fallingOnEnter()
+    {
+        this.sprite.play('jumpDown')
+        this.isGrounded = false
+    }
+
+    private fallingOnUpdate()
+    {
+        if(this.isGrounded)
+        {
+            this.stateMachine.setState('idle')
+        }
+        const speed = 2.5
+
+        if(this.keyQ.isDown)
+        {
+            this.sprite.flipX = true
+            this.sprite.setVelocityX(-speed)
+        }
+        else if(this.keyD.isDown)
+        {
+            this.sprite.flipX = false
+            this.sprite.setVelocityX(speed)
+        }
+    }d
+
+    private fallingOnExit()
+    {
+        this.isGrounded = true
+        this.sprite.setVelocityY(0)
     }
 
     private inputManager()

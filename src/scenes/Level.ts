@@ -2,6 +2,8 @@ import * as matter from 'matter'
 import Phaser, { Tilemaps } from 'phaser'
 import ElijahController from './ElijahController'
 import LoadRessources from './LoadRessources'
+import EnnemiesController from './EnnemiesController'
+import PigController from './PigController'
 
 
 export default class Level extends Phaser.Scene
@@ -9,8 +11,14 @@ export default class Level extends Phaser.Scene
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
     private elijah!: Phaser.Physics.Matter.Sprite
     private elijahController?: ElijahController
+    private ennemies !: EnnemiesController
     private screenHeight
     private screenWidth
+    private pigs: PigController[] = []
+    private up
+    private down
+    private right
+    private left
 
     constructor()
     {
@@ -20,15 +28,17 @@ export default class Level extends Phaser.Scene
     init()
     {
         this.cursors = this.input.keyboard.createCursorKeys()
-        this.events.once(Phaser.Scenes.Events.DESTROY, () => {
-            this.destroy()
-        })
+        this.ennemies = new EnnemiesController()
+        this.pigs = []
 
         this.screenHeight = this.game.config.height
         this.screenWidth = this.game.config.width
 
         //update world physics 30 times per second
         this.matter.world.update60Hz()
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+            this.destroy()
+        })
     }
 
     preload()
@@ -93,39 +103,91 @@ export default class Level extends Phaser.Scene
             {
                 case 'Elijah_spawn':
                 {   
-                    this.elijah = this.matter.add.sprite(x, y, 'Elijah', 0, {label: 'Elijah'})
+                    this.elijah = this.matter.add.sprite(x, y, 'Elijah', 0, {label: 'Elijah', isStatic:true})
                         .setData('type', 'Elijah')
                     this.elijah.setBody({
                             width:16,
-                            height:17
+                            height:17,
                         })
                     this.elijah.setFixedRotation()
                     this.elijah.setFriction(1)
-                    
+
+                    /*this.up = this.matter.add.rectangle(0,0,5,5, {
+                        isSensor: true,
+                        ignoreGravity:true,
+                    })
+
+                    this.down = this.matter.add.rectangle(0,0,5,5, {
+                        isSensor: true,
+                        ignoreGravity:true
+                    })
+
+                    this.left = this.matter.add.rectangle(0,0,5,5, {
+                        isSensor: true,
+                        ignoreGravity:true
+                    })
+
+                    this.right = this.matter.add.rectangle(0,0,5,5, {
+                        isSensor: true,
+                        ignoreGravity:true
+                    })*/
                     
                     let smoke = this.add.particles('smoke')
-                    this.elijahController = new ElijahController(this, this.elijah, smoke)
-
-
-                    this.cameras.main.startFollow(this.elijah, false, 0.1, 0.1)
+                    this.elijahController = new ElijahController(this, this.elijah, smoke, this.ennemies)
+                    this.cameras.main.startFollow(this.elijah, true, 0.1, 0.1)
                     break
                 }
+                /*case 'Pig':
+                {
+                    const pig = this.matter.add.sprite(x, y, 'Pig')
+                        .setFixedRotation()
+
+                    this.pigs.push(new PigController(this, pig, this.ennemies))
+                    this.ennemies.add('pig', pig.body as MatterJS.BodyType)
+                    break
+                }
+                case 'Corner':
+                {
+                    const Bodies = this.matter.add
+                    const corner = Bodies.rectangle(x+(width*0.5), y+(height*0.5), 16, 16, {
+                        isSensor: true,
+                        isStatic:true,
+                        label:'corner'
+                    })
+                    this.ennemies.add('corner', corner)
+                    break
+                }*/
             }
         })
     }
 
     destroy()
     {
-        
+        this.scene.stop('interface')
+        this.pigs.forEach(pig => pig.destroy())
     }
-
+d
     update(t: number, dt: number)
     {
         this.elijahController?.update(dt)
+        this.pigs.forEach(pig => pig.update(dt))
         if(this.elijah.x>2700)
         {
             this.cameras.main.stopFollow()
         }
+        this.hitdetection()
         //console.log(this.elijah.x)
+    }
+
+    private hitdetection()
+    {
+        /*this.up.position.x = this.elijah.x+6
+        this.up.position.y = this.elijah.y-6
+
+        this.down.position.x = this.elijah.x+6
+        this.down.position.y = this.elijah.y+12
+
+        this.left.position.x = this.elijah.x-3
+        this.left.position.y = this.elijah.y+5*/
     }
 }
