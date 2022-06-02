@@ -1,7 +1,8 @@
-import { BodyType } from 'matter'
+import { BodyType, Events } from 'matter'
 import Phaser, { BlendModes } from 'phaser'
 import StateMachine from '~/statemachine/StateMachine'
 import EnnemiesController from './EnnemiesController'
+import { sharedInstance as events} from './EventCenter'
 
 type CursorKeys = Phaser.Types.Input.Keyboard.CursorKeys
 
@@ -22,6 +23,9 @@ export default class PlayerController
     private isGrounded
     private refY
     private canFireHook
+    private activeWeapon
+    private activeWeaponSelection
+    private hitbox
 
     constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke, ennemies: EnnemiesController)
     {
@@ -33,6 +37,16 @@ export default class PlayerController
         this.isGrounded = false
         this.refY=0
         this.canFireHook = true
+        this.activeWeapon = 'Hook'
+        this.activeWeaponSelection = 0
+
+        /*this.hitbox = this.scene.matter.add.rectangle(0, 0, 32, 16, {
+            isSensor:true,
+            isStatic: false,
+            ignoreGravity: false,
+            label:'hitbox-attack'
+        })*/
+        
 
         this.inputManager()
         this.createAnimations()
@@ -69,6 +83,11 @@ export default class PlayerController
                 onUpdate: this.fallingOnUpdate,
                 onExit: this.fallingOnExit
             })
+            .addState('attack', {
+                onEnter: this.attackOnEnter,
+                onUpdate: this.attackOnUpdate,
+                onExit: this.attackOnExit
+            })
             .setState('falling')
 
             this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
@@ -102,8 +121,28 @@ export default class PlayerController
                 }
             })
 
-            
-            this.scene.input.on("pointerdown", this.fireHook, this)
+            this.scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
+                this.activeWeaponSelection+=deltaY
+                this.activeWeaponSelection=this.activeWeaponSelection%300
+                events.emit('weapon-changed', this.activeWeapon)
+            }, this);
+
+        this.scene.input.on("pointerup", (pointer) => {
+            if(this.activeWeapon === 'Hook')
+            {
+                this.fireHook(pointer)
+            }
+            else if(this.activeWeapon === 'Blade')
+            {
+                this.stateMachine.setState('attack')
+            }
+            else if(this.activeWeapon === 'Pistol')
+            {
+                //console.log('Pistol')
+            }
+        })
+
+        //this.changeWeapon()
     }
 
     update(dt: number)
@@ -125,7 +164,9 @@ export default class PlayerController
         //console.log("this.yPos : "+this.yPos)
         //console.log('this.sprite.y = '+this.sprite.y)
         //console.log('refY = '+this.refY)
-        console.log(this.canFireHook)
+        //console.log(this.activeWeapon)
+        this.changeWeapon()
+        
     }
 
 
@@ -225,7 +266,9 @@ export default class PlayerController
 
     private walkOnExit()
     {
+
     }
+
     private jumpOnEnter()
     {
         this.isGrounded = false
@@ -291,7 +334,7 @@ export default class PlayerController
                 
 
                 let distance = Phaser.Math.Distance.Between(this.sprite.x, this.sprite.y, this.hook.position.x, this.hook.position.y)
-                console.log(distance)
+                //console.log(distance)
                 if(distance > 16*2 && distance < 200)
                 {
                     this.rope = this.scene.matter.add.constraint(this.sprite.body as BodyType, this.hook, distance, 0)
@@ -356,6 +399,43 @@ export default class PlayerController
         this.sprite.setVelocityY(0)
     }
 
+    private attackOnEnter()
+    {
+        let hitbox
+        if(this.sprite.flipX)
+                {
+                    hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x-10, this.sprite.body.position.y, 32, 16, {
+                        isSensor:true,
+                        isStatic: false,
+                        ignoreGravity: true,
+                        label:'hitbox-attack'
+                    })
+                }
+                else{
+                    hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x+20, this.sprite.body.position.y, 32, 16, {
+                        isSensor:true,
+                        isStatic: false,
+                        ignoreGravity: true,
+                        label:'hitbox-attack'
+                    })
+                }
+        this.scene.time.delayedCall(100, () => {
+            this.scene.matter.world.remove(hitbox);
+        })
+
+        this.stateMachine.setState('idle')
+    }
+
+    private attackOnUpdate()
+    {
+        
+    }
+
+    private attackOnExit()
+    {
+
+    }
+
     private inputManager()
     {
         this.keyD = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
@@ -365,29 +445,32 @@ export default class PlayerController
 
     private fireHook(e)
     {
-        if(this.rope)
+        if(e.leftButtonReleased())
         {
-            //destroy the current constraint
-            this.releaseHook()
-        }
-        if(this.canFireHook)
-        {
-            this.canFireHook = false
-            this.stateMachine.setState('grapple')
-            let angle = Phaser.Math.Angle.Between(this.sprite.x, this.sprite.y, e.worldX, e.worldY)
+            if(this.rope)
+            {
+                //destroy the current constraint
+                this.releaseHook()
+            }
+            if(this.canFireHook)
+            {
+                this.canFireHook = false
+                this.stateMachine.setState('grapple')
+                let angle = Phaser.Math.Angle.Between(this.sprite.x, this.sprite.y, e.worldX, e.worldY)
     
-            this.hook = this.scene.matter.add.rectangle(this.sprite.x+(16*2)*Math.cos(angle), this.sprite.y+(16*2)*Math.sin(angle), 5, 5, {
-                ignoreGravity:true
-            })
-            this.hook.label = 'HOOK'
+                this.hook = this.scene.matter.add.rectangle(this.sprite.x+(16*2)*Math.cos(angle), this.sprite.y+(16*2)*Math.sin(angle), 5, 5, {
+                    ignoreGravity:true
+                })
+                this.hook.label = 'HOOK'
     
     
-            this.scene.matter.body.setVelocity(this.hook,{
-                x: 10* Math.cos(angle),
-                y: 10* Math.sin(angle)
-            })
-            //this.scene.cameras.main.startFollow(this.hook, true, 0.1, 0.1)
-            //console.log(angle)
+                this.scene.matter.body.setVelocity(this.hook,{
+                    x: 10* Math.cos(angle),
+                    y: 10* Math.sin(angle)
+                })
+                //this.scene.cameras.main.startFollow(this.hook, true, 0.1, 0.1)
+                //console.log(angle)
+            }
         }
     }
 
@@ -441,5 +524,29 @@ export default class PlayerController
             frameRate: 10,
             repeat: 0
         });
+    }
+
+    private abs(value: number){
+        if(value<0){
+            return value*-1
+        }
+        return value
+    }
+
+    private changeWeapon()
+    {
+        events.emit('weapon-changed', this.activeWeapon)
+        if(this.abs(this.activeWeaponSelection) === 0)
+        {
+            this.activeWeapon = 'Blade'
+        }
+        else if(this.abs(this.activeWeaponSelection) === 100)
+        {
+            this.activeWeapon = 'Pistol'
+        }
+        else if(this.abs(this.activeWeaponSelection) === 200)
+        {
+            this.activeWeapon = 'Hook'
+        }
     }
 }

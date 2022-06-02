@@ -25,4 +25,13 @@ export default class ObstaclesController
         }
         return true
     }
+
+    delete(name: string, body:MatterJS.BodyType)
+    {
+        const key = createKey(name, body.id)
+        if(this.ennemies.has(key))
+        {
+            this.ennemies.delete(key)
+        }
+    }
 }

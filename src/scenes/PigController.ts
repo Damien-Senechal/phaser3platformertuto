@@ -34,15 +34,17 @@ export default class PigController
             onEnter: this.moveRightOnEnter,
             onUpdate: this.moveRightOnUpdate
         })
-        .addState('dead')
+        .addState('dead', {
+            onEnter: this.deadOnEnter
+        })
         .setState('idle')
 
         this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
             const bodyB = data.bodyB as MatterJS.BodyType
             const bodyA = data.bodyA as MatterJS.BodyType
 
-            console.log(bodyA)
-            console.log(bodyB)
+            //console.log(bodyA)
+            //console.log(bodyB)
 
             if(bodyA.label === 'corner' || bodyB.label === 'corner')
             {
@@ -56,6 +58,12 @@ export default class PigController
                     this.moveTime = 0
                     this.stateMachine.setState('move-left')
                 }
+                return
+            }
+
+            if(bodyA.label === 'hitbox-attack' || bodyB.label === 'hitbox-attack')
+            {
+                this.stateMachine.setState('dead')
                 return
             }
         })
@@ -125,5 +133,10 @@ export default class PigController
         {
             this.stateMachine.setState('move-left')
         }
+    }
+
+    private deadOnEnter()
+    {
+        this.sprite.destroy()
     }
 }

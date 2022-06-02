@@ -7,6 +7,7 @@ export default class UI extends Phaser.Scene
 
     private lastHealth
     private elijahPortrait
+    private weaponText
 
     constructor()
     {
@@ -38,6 +39,17 @@ export default class UI extends Phaser.Scene
         this.graphics = this.add.graphics()
         this.setInterface(100, 100, 10)
         this.add.sprite(26, 25, 'Elijah-Portrait').play('idle-portrait')
+
+        events.on('weapon-changed', this.changeWeapon, this)
+
+        this.weaponText = this.add.text(540, 10, 'allo', {
+            color: '#000000'
+        })
+    }
+
+    update() 
+    {
+        
     }
 
 
@@ -78,6 +90,11 @@ export default class UI extends Phaser.Scene
             this.add.image(54+i*10, 36, 'bullet-icon').setScale(2)
         }
 
+        
+    }
 
+    private changeWeapon(value)
+    {   
+        this.weaponText.text = `${value}`
     }
 }
