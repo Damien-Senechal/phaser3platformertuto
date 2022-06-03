@@ -116,7 +116,7 @@ export default class Level extends Phaser.Scene
                     this.cameras.main.startFollow(this.elijah, false, 0.1, 0.1)
                     break
                 }
-                /*case 'Pig':
+                case 'Pig':
                 {
                     let pig = this.matter.add.sprite(x, y, 'Pig', 0)
                         .setFixedRotation()
@@ -137,7 +137,7 @@ export default class Level extends Phaser.Scene
                     })
                     this.ennemies.add('corner', corner)
                     break
-                }*/
+                }
                 case 'Checkpoint':
                 {
                     let checkpoint = this.matter.add.rectangle(x, y, 16, 1000, {
