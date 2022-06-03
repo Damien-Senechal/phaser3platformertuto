@@ -56,6 +56,8 @@ export default class Level2 extends Phaser.Scene
 
         const map = this.make.tilemap( {key: 'tilemap2' } )
         const tileset = map.addTilesetImage('Town_Tileset', 'tiles2')
+        const background = map.createLayer('background', tileset)
+        background.setDepth(-1)
 
         const ground = map.createLayer('ground', tileset)
         ground.setDepth(0)
