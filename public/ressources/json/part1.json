@@ -39,8 +39,8 @@
                  "type":"",
                  "visible":true,
                  "width":16,
-                 "x":624,
-                 "y":400
+                 "x":1776,
+                 "y":432
                 }, 
                 {
                  "height":0,
@@ -156,12 +156,23 @@
                  "height":16,
                  "id":87,
                  "name":"Checkpoint",
+                 "properties":[
+                        {
+                         "name":"xR",
+                         "type":"int",
+                         "value":1840
+                        }, 
+                        {
+                         "name":"yR",
+                         "type":"int",
+                         "value":416
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":16,
                  "x":1840,
-                 "y":416
+                 "y":400
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -589,7 +600,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":88,
+ "nextobjectid":90,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.1",

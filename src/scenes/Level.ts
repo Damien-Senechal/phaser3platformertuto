@@ -132,7 +132,7 @@ export default class Level extends Phaser.Scene
                     const Bodies = this.matter.add
                     const corner = Bodies.rectangle(x+(width*0.5), y+(height*0.5), 16, 16, {
                         isSensor: true,
-                        isStatic:true,
+                        isStatic: true,
                         label:'corner'
                     })
                     this.ennemies.add('corner', corner)
@@ -140,8 +140,10 @@ export default class Level extends Phaser.Scene
                 }
                 case 'Checkpoint':
                 {
-                    let checkpoint = this.matter.add.sprite(x, y, 'Checkpoint', 0, {
+                    let checkpoint = this.matter.add.rectangle(x, y, 16, 1000, {
                         isStatic: true,
+                        isSensor: true,
+                        ignoreGravity: true,
                         label: 'Checkpoint'
                     })
                 }

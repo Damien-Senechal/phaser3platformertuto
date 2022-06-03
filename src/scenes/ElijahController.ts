@@ -154,9 +154,10 @@ export default class PlayerController
 
                 if(bodyB.label === 'Checkpoint')
                 {
+                    //console.log(bodyB.gameObject)
                     this.checkpoint = {
                         x:bodyB.position.x,
-                        y:bodyB.position.y
+                        y:bodyB.position.y,
                     }
                 }
             })
