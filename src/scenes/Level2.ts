@@ -6,7 +6,7 @@ import EnnemiesController from './EnnemiesController'
 import PigController from './PigController'
 
 
-export default class Level extends Phaser.Scene
+export default class Level2 extends Phaser.Scene
 {
     private cursors!: Phaser.Types.Input.Keyboard.CursorKeys
     private elijah!: Phaser.Physics.Matter.Sprite
@@ -19,7 +19,7 @@ export default class Level extends Phaser.Scene
 
     constructor()
     {
-        super('level')
+        super('fort')
     }
 
     init()
@@ -54,8 +54,8 @@ export default class Level extends Phaser.Scene
         this.cameras.main.startFollow(this.elijah)
         this.load.image('tiles', 'assets/sheet.png')*/
 
-        const map = this.make.tilemap( {key: 'tilemap' } )
-        const tileset = map.addTilesetImage('tile_desert3', 'tiles')
+        const map = this.make.tilemap( {key: 'tilemap2' } )
+        const tileset = map.addTilesetImage('Town_Tileset', 'tiles2')
 
         const ground = map.createLayer('ground', tileset)
         ground.setDepth(0)
@@ -116,7 +116,7 @@ export default class Level extends Phaser.Scene
                     this.cameras.main.startFollow(this.elijah, false, 0.1, 0.1)
                     break
                 }
-                /*case 'Pig':
+                case 'Pig':
                 {
                     let pig = this.matter.add.sprite(x, y, 'Pig', 0)
                         .setFixedRotation()
@@ -137,7 +137,7 @@ export default class Level extends Phaser.Scene
                     })
                     this.ennemies.add('corner', corner)
                     break
-                }*/
+                }
                 case 'Checkpoint':
                 {
                     let checkpoint = this.matter.add.rectangle(x, y, 16, 1000, {
@@ -172,10 +172,10 @@ d
     {
         this.elijahController?.update(dt)
         this.pigs.forEach(pig => pig.update(dt))
-        if(this.elijah.x>2700)
+        /*if(this.elijah.x>2700)
         {
             this.cameras.main.stopFollow()
-        }
+        }*/
         //console.log(this.pigs)
         //console.log(this.elijah.x)
     }

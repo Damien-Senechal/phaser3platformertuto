@@ -11,7 +11,7 @@ export default class Menu extends Phaser.Scene
     {
         const {width, height} = this.scale
 
-        this.add.text(width*0.5, height*0.3, 'SALUT', {
+        this.add.text(width*0.5, height*0.3, 'Before You Realize', {
             fontSize: '52px',
             color: '#ff0000'
         })

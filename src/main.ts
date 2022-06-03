@@ -7,6 +7,7 @@ import TestRoom from './scenes/TestRoom'
 import Level from './scenes/Level'
 import Interface from './scenes/Interface'
 import Menu from './scenes/Menu'
+import Level2 from './scenes/Level2'
 
 const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
@@ -27,7 +28,7 @@ const config: Phaser.Types.Core.GameConfig = {
 		}
 	},
 	//scene: [Game, UI, GameOver]
-	scene: [Menu, Level, Interface, GameOver]
+	scene: [Menu, Level, Level2, Interface, GameOver]
 }
 
 export default new Phaser.Game(config)

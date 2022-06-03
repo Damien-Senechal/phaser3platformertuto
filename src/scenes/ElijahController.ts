@@ -169,7 +169,7 @@ export default class PlayerController
             if(bodyB.label === 'End')
             {
                 //console.log(bodyB.label)
-                this.scene.scene.start('game-over')
+                this.scene.scene.start('fort')
             }
             })
 
@@ -266,7 +266,7 @@ export default class PlayerController
 
         if(this.keyE.isDown)
         {
-            console.log('')
+            //console.log('')
             this.stateMachine.setState('parry')
         }
     }
@@ -660,7 +660,7 @@ export default class PlayerController
 
             if(bodyB.label === 'Checkpoint')
             {
-                console.log(bodyB.label)
+                //console.log(bodyB.label)
                 this.checkpoint = {
                     x:bodyB.position.x,
                     y:bodyB.position.y,
@@ -668,12 +668,12 @@ export default class PlayerController
             }
             if(bodyB.label === 'End')
             {
-                console.log(bodyB.label)
-                this.scene.scene.start('game-over')
+                //console.log(bodyB.label)
+                this.scene.scene.start('fort')
             }
         })
 
-        console.log('WE HAVE PARRY')
+        //console.log('WE HAVE PARRY')
     }
 
     private inputManager()
@@ -885,7 +885,7 @@ export default class PlayerController
 
             if(bodyB.label === 'Checkpoint')
             {
-                console.log(bodyB.label)
+                //console.log(bodyB.label)
                 this.checkpoint = {
                     x:bodyB.position.x,
                     y:bodyB.position.y,
@@ -893,8 +893,8 @@ export default class PlayerController
             }
             if(bodyB.label === 'End')
             {
-                console.log(bodyB.label)
-                this.scene.scene.start('game-over')
+                //console.log(bodyB.label)
+                this.scene.scene.start('fort')
             }
         })
     }
