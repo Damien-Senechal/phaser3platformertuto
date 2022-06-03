@@ -15,10 +15,7 @@ export default class Level extends Phaser.Scene
     private screenHeight
     private screenWidth
     private pigs: PigController[] = []
-    private up
-    private down
-    private right
-    private left
+    private pigId = 0
 
     constructor()
     {
@@ -125,8 +122,9 @@ export default class Level extends Phaser.Scene
                         .setFixedRotation()
                     pig.setFixedRotation()
 
-                    this.pigs.push(new PigController(this, pig, this.ennemies, this.elijah))
+                    this.pigs.push(new PigController(this, pig, this.ennemies, this.elijah, this.pigId))
                     this.ennemies.add('pig', pig.body as MatterJS.BodyType)
+                    this.pigId+=1
                     break
                 }
                 case 'Corner':
@@ -158,19 +156,7 @@ d
         {
             this.cameras.main.stopFollow()
         }
-        this.hitdetection()
+        //console.log(this.pigs)
         //console.log(this.elijah.x)
-    }
-
-    private hitdetection()
-    {
-        /*this.up.position.x = this.elijah.x+6
-        this.up.position.y = this.elijah.y-6
-
-        this.down.position.x = this.elijah.x+6
-        this.down.position.y = this.elijah.y+12
-
-        this.left.position.x = this.elijah.x-3
-        this.left.position.y = this.elijah.y+5*/
     }
 }

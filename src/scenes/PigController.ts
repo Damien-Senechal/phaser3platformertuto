@@ -12,16 +12,18 @@ export default class PigController
     private ennemies: EnnemiesController
     private target
     private alive = true
+    private id
 
     private moveTime = 0
     private speed = 1
 
-    constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, ennemies: EnnemiesController, target: Phaser.Physics.Matter.Sprite)
+    constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, ennemies: EnnemiesController, target: Phaser.Physics.Matter.Sprite, id: number)
     {
         this.scene = scene
         this.sprite = sprite
         this.ennemies = ennemies
         this.target = target
+        this.id = id
 
         //this.createAnimations()
 
@@ -70,6 +72,9 @@ export default class PigController
         })
         .setState('idle')
 
+        events.on('pig-killed', this.handleAttack, this)
+        //events.on('reset', this.reset, this)
+
         /*pigController.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
             const bodyB = data.bodyB as MatterJS.BodyType
             const bodyA = data.bodyA as MatterJS.BodyType
@@ -116,20 +121,15 @@ export default class PigController
                     }
                     return
                 }
-                if(b2.label === 'hitbox-attack' && b1.label === 'pig')
-                {
-                    this.alive = false
-                    this.stateMachine.setState('dead')
-                    return
-                }
+                
 
-                if(b1.label==='Elijah' && b2 === pigController.sensors.center){
+                if(b1.label==='Elijah' && b2 === pigController.sensors.center && this.alive){
                     this.stateMachine.setState('attack')
                     this.target.x = b1.position.x
                     this.target.y = b1.position.y
                     return
                 }
-                if(b1.label==='Elijah' && b2.label === 'pig'){
+                if(b1.label==='Elijah' && b2.label === 'pig' && this.alive){
                     this.target.x = b1.position.x
                     this.target.y = b1.position.y
                     this.stateMachine.setState('back')
@@ -156,6 +156,8 @@ export default class PigController
 
     destroy()
     {
+        events.off('pig-killed', this.handleAttack,this)
+        events.off('reset', this.reset, this)
     }
 
     update(dt: number)
@@ -218,9 +220,10 @@ export default class PigController
 
     private deadOnEnter()
     {
-        this.alive = false
         this.sprite.destroy()
+        events.emit('reset')
     }
+
 
     private attackOnUpdate()
     {
@@ -239,6 +242,13 @@ export default class PigController
                 this.sprite.setVelocityX(0)
             }
         }
+
+        this.scene.time.delayedCall(3000, () => {
+            if(this.alive)
+            {
+                this.stateMachine.setState('idle')
+            }
+        })
         
     }
 
@@ -261,5 +271,28 @@ export default class PigController
         else{
             this.stateMachine.setState('idle')
         } 
+    }
+
+    private handleAttack(pig: Phaser.Physics.Matter.Sprite)
+    {
+        if(this.sprite !== pig)
+        {
+            this.stateMachine.setState('idle')
+            return
+        }
+
+        this.alive = false
+        events.off('pig-killed', this.handleAttack, this)
+
+        this.stateMachine.setState('dead')
+    }
+
+    private reset()
+    {
+        events.off('pig-killed', this.handleAttack, this)
+        if(this.alive)
+        {
+            this.stateMachine.setState('idle')
+        }
     }
 }

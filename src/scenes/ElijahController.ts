@@ -133,9 +133,16 @@ export default class PlayerController
                 }
             })
 
-            this.scene.matter.world.on('collisionstart', (event, bodyA, bodyB) => {
-                
-            })
+            this.scene.matter.world.on('collisionstart', (event, b1, b2) => {
+                for (var i = 0; i < event.pairs.length; i++) {
+                    if(b2.label === 'hitbox-attack' && b1.label === 'pig')
+                    {
+                        this.lastPig = b1.gameObject
+                        events.emit('pig-killed',this.lastPig)
+                        return
+                    }
+                }
+            }, this);
 
             this.scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
                 this.activeWeaponSelection+=deltaY
