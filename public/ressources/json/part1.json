@@ -109,28 +109,6 @@
                  "y":528
                 }, 
                 {
-                 "height":16,
-                 "id":81,
-                 "name":"Corner",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":896,
-                 "y":480
-                }, 
-                {
-                 "height":16,
-                 "id":82,
-                 "name":"Corner",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":784,
-                 "y":480
-                }, 
-                {
                  "height":0,
                  "id":83,
                  "name":"Pig",
@@ -603,7 +581,7 @@
  "nextobjectid":87,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.8.2",
+ "tiledversion":"1.8.1",
  "tileheight":16,
  "tilesets":[
         {

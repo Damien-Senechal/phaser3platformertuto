@@ -27,6 +27,9 @@ export default class PlayerController
     private activeWeaponSelection
     private lastPig
     private hitbox
+    private bullet
+    private canBlade
+    private canShoot
 
     constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke, ennemies: EnnemiesController)
     {
@@ -40,7 +43,9 @@ export default class PlayerController
         this.canFireHook = true
         this.activeWeapon = 'Hook'
         this.activeWeaponSelection = 0
-
+        this.canBlade = true
+        this.canShoot = true
+        
         /*this.hitbox = this.scene.matter.add.rectangle(0, 0, 32, 16, {
             isSensor:true,
             isStatic: false,
@@ -54,6 +59,8 @@ export default class PlayerController
 
         this.hook = null
         this.rope = null
+        this.bullet = null
+
 
         //this.scene.input.on("pointerdown", this.fireHook, this.scene)
 
@@ -88,6 +95,9 @@ export default class PlayerController
                 onEnter: this.attackOnEnter,
                 onUpdate: this.attackOnUpdate,
                 onExit: this.attackOnExit
+            })
+            .addState('shoot', {
+                onEnter: this.shootOnEnter
             })
             .addState('pig-hit', {
                 onEnter: this.pigOnEnter
@@ -141,6 +151,13 @@ export default class PlayerController
                         events.emit('pig-killed',this.lastPig)
                         return
                     }
+                    if(b2.label === 'hitbox-shoot' && b1.label === 'pig')
+                    {
+                        this.scene.matter.world.remove(b2);
+                        this.lastPig = b1.gameObject
+                        events.emit('pig-killed',this.lastPig)
+                        return
+                    }
                 }
             }, this);
 
@@ -161,7 +178,7 @@ export default class PlayerController
             }
             else if(this.activeWeapon === 'Pistol')
             {
-                //console.log('Pistol')
+                this.shootPistol(pointer)
             }
         })
 
@@ -189,6 +206,7 @@ export default class PlayerController
         //console.log('refY = '+this.refY)
         //console.log(this.activeWeapon)
         this.changeWeapon()
+        console.log(this.canBlade)
         
     }
 
@@ -424,29 +442,42 @@ export default class PlayerController
 
     private attackOnEnter()
     {
-        if(this.sprite.flipX)
-                {
-                    this.hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x-22, this.sprite.body.position.y-2, 32, 16, {
-                        isSensor:true,
-                        isStatic: false,
-                        ignoreGravity: true,
-                        label:'hitbox-attack'
-                    })
-                }
-                else{
-                    this.hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x+22, this.sprite.body.position.y-2, 32, 16, {
-                        isSensor:true,
-                        isStatic: false,
-                        ignoreGravity: true,
-                        label:'hitbox-attack'
-                    })
-                }
-        this.sprite.setStatic(true)
-        this.stateMachine.setState('idle')
-        this.scene.time.delayedCall(100, () => {
-            this.scene.matter.world.remove(this.hitbox);
-            this.sprite.setStatic(false)
-        })
+        if(this.canBlade)
+        {
+            this.canBlade = false
+            if(this.sprite.flipX)
+            {
+                this.hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x-22, this.sprite.body.position.y-2, 32, 16, {
+                    isSensor:true,
+                    isStatic: false,
+                    ignoreGravity: true,
+                    label:'hitbox-attack'
+                })
+            }
+            else{
+                this.hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x+22, this.sprite.body.position.y-2, 32, 16, {
+                    isSensor:true,
+                    isStatic: false,
+                    ignoreGravity: true,
+                    label:'hitbox-attack'
+                })
+            }
+            this.sprite.setStatic(true)
+            this.stateMachine.setState('idle')
+            this.scene.time.delayedCall(100, () => {
+                this.scene.matter.world.remove(this.hitbox);
+                this.sprite.setStatic(false)
+            })
+            this.scene.time.delayedCall(500, () => {
+                this.canBlade = true
+            })
+        }
+        else{
+            this.stateMachine.setState('idle')
+        }
+        /*this.scene.time.delayedCall(1000, () => {
+            this.canBlade = true
+        })*/
     }
 
     private attackOnUpdate()
@@ -513,6 +544,11 @@ export default class PlayerController
         //this.setHealth(this.health - 25)
     }
 
+    private shootOnEnter()
+    {
+        this.stateMachine.setState('idle')
+    }
+
     private inputManager()
     {
         this.keyD = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
@@ -536,7 +572,7 @@ export default class PlayerController
                 let angle = Phaser.Math.Angle.Between(this.sprite.x, this.sprite.y, e.worldX, e.worldY)
     
                 this.hook = this.scene.matter.add.rectangle(this.sprite.x+(16*2)*Math.cos(angle), this.sprite.y+(16*2)*Math.sin(angle), 5, 5, {
-                    ignoreGravity:true
+                    ignoreGravity:true,
                 })
                 this.hook.label = 'HOOK'
     
@@ -625,5 +661,36 @@ export default class PlayerController
         {
             this.activeWeapon = 'Hook'
         }
+    }
+
+    private shootPistol(e)
+    {
+        if(this.canShoot)
+        {
+            this.canShoot = false
+            if(e.leftButtonReleased())
+            {
+                let angle = Phaser.Math.Angle.Between(this.sprite.x, this.sprite.y, e.worldX, e.worldY)
+    
+                        this.bullet = this.scene.matter.add.rectangle(this.sprite.x+(16)*Math.cos(angle), this.sprite.y+(16)*Math.sin(angle), 5, 5, {
+                            ignoreGravity:true
+                        })
+                        this.bullet.label = 'hitbox-shoot'
+    
+    
+                        this.scene.matter.body.setVelocity(this.bullet,{
+                            x: 10* Math.cos(angle),
+                            y: 10* Math.sin(angle)
+                        })
+                this.stateMachine.setState('shoot')
+            }
+            this.scene.time.delayedCall(500, () => {
+               this.canShoot = true
+            })
+        }
+        else{
+            this.stateMachine.setState('idle')
+        }
+        
     }
 }
