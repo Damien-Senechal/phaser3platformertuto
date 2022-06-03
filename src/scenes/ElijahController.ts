@@ -16,6 +16,7 @@ export default class PlayerController
     private keyD
     private keyQ
     private keySpace
+    private keyE
     private hook
     private rope
     private graphics
@@ -112,6 +113,11 @@ export default class PlayerController
                 onUpdate: this.deadOnUpdate,
                 onExit: this.deadOnExit
             })
+            .addState('parry', {
+                onEnter: this.parryOnEnter,
+                onExit: this.parryOnExit
+
+            })
             .setState('falling')
 
             this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
@@ -153,13 +159,18 @@ export default class PlayerController
                 }
 
                 if(bodyB.label === 'Checkpoint')
-                {
-                    //console.log(bodyB.gameObject)
-                    this.checkpoint = {
-                        x:bodyB.position.x,
-                        y:bodyB.position.y,
-                    }
+            {
+                //console.log(bodyB.label)
+                this.checkpoint = {
+                    x:bodyB.position.x,
+                    y:bodyB.position.y,
                 }
+            }
+            if(bodyB.label === 'End')
+            {
+                //console.log(bodyB.label)
+                this.scene.scene.start('game-over')
+            }
             })
 
             this.scene.matter.world.on('collisionstart', (event, b1, b2) => {
@@ -251,6 +262,12 @@ export default class PlayerController
         if(spaceJustPressed)
         {
             this.stateMachine.setState('jump')
+        }
+
+        if(this.keyE.isDown)
+        {
+            console.log('')
+            this.stateMachine.setState('parry')
         }
     }
 
@@ -388,7 +405,7 @@ export default class PlayerController
             this.releaseHook()
         }
         this.scene.matter.world.on("collisionstart", (e, b1, b2)=>{
-            if((b1.label == 'HOOK') || (b2.label == 'HOOK') && !this.rope && this.hook)
+            if((b1.label == 'HOOK') || (b2.label == 'HOOK') && !this.rope && this.hook && (b1.label !== 'Checkpoint' && b2.label !== 'Checkpoint'))
             {
                 this.scene.matter.body.setStatic(this.hook, true)
                 
@@ -591,11 +608,80 @@ export default class PlayerController
         
     }
 
+    private parryOnEnter()
+    {
+        this.sprite.setOnCollide(() => {})
+        this.sprite.setStatic(true)
+        this.scene.time.delayedCall(1000, () => {
+            this.stateMachine.setState('idle')
+        })
+    }
+
+    private parryOnExit()
+    {
+        this.sprite.setStatic(false)
+        this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
+            const bodyA = data.bodyA as MatterJS.BodyType
+            const bodyB = data.bodyB as MatterJS.BodyType
+            const gameObjectA = bodyA
+            const gameObjectB = bodyB
+
+            //console.log(bodyB.label)
+
+            //dconsole.log(gameObjectA)
+            //console.log(gameObjectB)
+
+            if(!gameObjectA)
+            {
+                return
+            }
+
+            if(bodyB.label === 'pig')
+            {
+                this.lastPig = bodyB.gameObject
+                this.stateMachine.setState('pig-hit')
+            }
+
+            if(gameObjectA.label === 'ground' || gameObjectA.label === 'corner')
+            {
+                
+                this.sprite.body.velocity.y = 0
+                if(this.stateMachine.isCurrentState('jump'))
+                {
+                    this.stateMachine.setState('idle')
+                }
+                if(this.stateMachine.isCurrentState('falling'))
+                {
+                    this.isGrounded = true
+                    this.stateMachine.setState('idle')
+                }            
+                return
+            }
+
+            if(bodyB.label === 'Checkpoint')
+            {
+                console.log(bodyB.label)
+                this.checkpoint = {
+                    x:bodyB.position.x,
+                    y:bodyB.position.y,
+                }
+            }
+            if(bodyB.label === 'End')
+            {
+                console.log(bodyB.label)
+                this.scene.scene.start('game-over')
+            }
+        })
+
+        console.log('WE HAVE PARRY')
+    }
+
     private inputManager()
     {
         this.keyD = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
         this.keyQ = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Q)
         this.keySpace = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+        this.keyE = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E)
     }
 
     private fireHook(e)
@@ -799,10 +885,16 @@ export default class PlayerController
 
             if(bodyB.label === 'Checkpoint')
             {
+                console.log(bodyB.label)
                 this.checkpoint = {
                     x:bodyB.position.x,
-                    y:bodyB.position.y
+                    y:bodyB.position.y,
                 }
+            }
+            if(bodyB.label === 'End')
+            {
+                console.log(bodyB.label)
+                this.scene.scene.start('game-over')
             }
         })
     }

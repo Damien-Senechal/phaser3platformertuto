@@ -6,6 +6,7 @@ import GameOver from './scenes/GameOver'
 import TestRoom from './scenes/TestRoom'
 import Level from './scenes/Level'
 import Interface from './scenes/Interface'
+import Menu from './scenes/Menu'
 
 const config: Phaser.Types.Core.GameConfig = {
 	type: Phaser.AUTO,
@@ -21,12 +22,12 @@ const config: Phaser.Types.Core.GameConfig = {
 	physics: {
 		default: 'matter',
 		matter: {
-			debug:true,
+			debug:false,
 			gravity:{y:1}
 		}
 	},
 	//scene: [Game, UI, GameOver]
-	scene: [Level, Interface, GameOver]
+	scene: [Menu, Level, Interface, GameOver]
 }
 
 export default new Phaser.Game(config)

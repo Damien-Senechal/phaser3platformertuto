@@ -1,17 +1,17 @@
 import Phaser from 'phaser'
 
-export default class GameOver extends Phaser.Scene
+export default class Menu extends Phaser.Scene
 {
     constructor()
     {
-        super('game-over')
+        super('menu')
     }
 
     create()
     {
         const {width, height} = this.scale
 
-        this.add.text(width*0.5, height*0.3, 'Game Over', {
+        this.add.text(width*0.5, height*0.3, 'SALUT', {
             fontSize: '52px',
             color: '#ff0000'
         })
@@ -23,7 +23,7 @@ export default class GameOver extends Phaser.Scene
             this.scene.start('level')
         })
 
-        this.add.text(button.x, button.y, 'Play Again', {
+        this.add.text(button.x, button.y, 'JOUER', {
             color: '#000000'
         })
         .setOrigin(0.5)
