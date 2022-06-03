@@ -9,5 +9,7 @@ export default class LoadRessources
         scene.load.spritesheet('Elijah', 'ressources/sprite/Elijah_idle-Sheet.png', { frameWidth: 32, frameHeight: 32 });
         scene.load.image('Pig', 'ressources/sprite/pig.png')
         scene.load.image('Sensor', 'ressources/sprite/sensor.png')
+        scene.load.image('Checkpoint', 'ressources/sprite/checkpoint.png')
+
     }
 }

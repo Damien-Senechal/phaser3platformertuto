@@ -30,6 +30,7 @@ export default class PlayerController
     private bullet
     private canBlade
     private canShoot
+    private checkpoint
 
     constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke, ennemies: EnnemiesController)
     {
@@ -45,6 +46,10 @@ export default class PlayerController
         this.activeWeaponSelection = 0
         this.canBlade = true
         this.canShoot = true
+        this.checkpoint = {
+            x:this.sprite.x, 
+            y:this.sprite.y
+        }
         
         /*this.hitbox = this.scene.matter.add.rectangle(0, 0, 32, 16, {
             isSensor:true,
@@ -102,6 +107,11 @@ export default class PlayerController
             .addState('pig-hit', {
                 onEnter: this.pigOnEnter
             })
+            .addState('dead', {
+                onEnter: this.deadOnEnter,
+                onUpdate: this.deadOnUpdate,
+                onExit: this.deadOnExit
+            })
             .setState('falling')
 
             this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
@@ -140,6 +150,14 @@ export default class PlayerController
                         this.stateMachine.setState('idle')
                     }            
                     return
+                }
+
+                if(bodyB.label === 'Checkpoint')
+                {
+                    this.checkpoint = {
+                        x:bodyB.position.x,
+                        y:bodyB.position.y
+                    }
                 }
             })
 
@@ -206,7 +224,7 @@ export default class PlayerController
         //console.log('refY = '+this.refY)
         //console.log(this.activeWeapon)
         this.changeWeapon()
-        console.log(this.canBlade)
+        //console.log(this.checkpoint)
         
     }
 
@@ -541,12 +559,35 @@ export default class PlayerController
 
         this.stateMachine.setState('idle')
 
-        //this.setHealth(this.health - 25)
+        this.setHealth(this.health - 10)
     }
 
     private shootOnEnter()
     {
         this.stateMachine.setState('idle')
+    }
+
+    private deadOnEnter()
+    {
+        //this.sprite.play('player-death')
+
+        this.sprite.setOnCollide(() => {})
+
+        this.scene.time.delayedCall(1500, () => {
+            //this.scene.scene.start('game-over')
+            this.respawn()
+        })
+
+    }
+
+    private deadOnUpdate()
+    {
+
+    }
+
+    private deadOnExit()
+    {
+        
     }
 
     private inputManager()
@@ -692,5 +733,76 @@ export default class PlayerController
             this.stateMachine.setState('idle')
         }
         
+    }
+
+    private setHealth(value: number)
+    {
+        this.health = Phaser.Math.Clamp(value - 10, 0, 100)
+
+        events.emit('health-changed', this.health)
+
+        if(this.health <= 0)
+        {
+            this.stateMachine.setState('dead')
+        }
+    }
+
+    private respawn()
+    {
+        if(this.sprite.isStatic())
+        {
+            this.sprite.setStatic(false)
+        }
+        this.sprite.x = this.checkpoint.x
+        this.sprite.y = this.checkpoint.y
+        this.setHealth(110)
+        this.stateMachine.setState('idle')
+
+        this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
+            const bodyA = data.bodyA as MatterJS.BodyType
+            const bodyB = data.bodyB as MatterJS.BodyType
+            const gameObjectA = bodyA
+            const gameObjectB = bodyB
+
+            //console.log(bodyB.label)
+
+            //dconsole.log(gameObjectA)
+            //console.log(gameObjectB)
+
+            if(!gameObjectA)
+            {
+                return
+            }
+
+            if(bodyB.label === 'pig')
+            {
+                this.lastPig = bodyB.gameObject
+                this.stateMachine.setState('pig-hit')
+            }
+
+            if(gameObjectA.label === 'ground' || gameObjectA.label === 'corner')
+            {
+                
+                this.sprite.body.velocity.y = 0
+                if(this.stateMachine.isCurrentState('jump'))
+                {
+                    this.stateMachine.setState('idle')
+                }
+                if(this.stateMachine.isCurrentState('falling'))
+                {
+                    this.isGrounded = true
+                    this.stateMachine.setState('idle')
+                }            
+                return
+            }
+
+            if(bodyB.label === 'Checkpoint')
+            {
+                this.checkpoint = {
+                    x:bodyB.position.x,
+                    y:bodyB.position.y
+                }
+            }
+        })
     }
 }

@@ -5,9 +5,12 @@ export default class UI extends Phaser.Scene
 {
     private graphics!: Phaser.GameObjects.Graphics
 
-    private lastHealth
     private elijahPortrait
     private weaponText
+
+    private health = 100
+    private stamina = 100
+    private bullet = 5
 
     constructor()
     {
@@ -37,10 +40,11 @@ export default class UI extends Phaser.Scene
         });
 
         this.graphics = this.add.graphics()
-        this.setInterface(100, 100, 10)
-        this.add.sprite(26, 25, 'Elijah-Portrait').play('idle-portrait')
+        this.setInterface(this.health, this.stamina, this.bullet)
+        this.elijahPortrait = this.add.sprite(26, 25, 'Elijah-Portrait').play('idle-portrait')
 
         events.on('weapon-changed', this.changeWeapon, this)
+        events.on('health-changed', this.handleHealthChanged, this)
 
         this.weaponText = this.add.text(540, 10, 'allo', {
             color: '#000000'
@@ -83,7 +87,7 @@ export default class UI extends Phaser.Scene
         if(percent2 > 0)
         {
             this.graphics.fillStyle(0xf4b41b)
-            this.graphics.fillRoundedRect(50, 21, width*percent, 7, 5)
+            this.graphics.fillRoundedRect(50, 21, width*percent2, 7, 5)
         }
 
         for (let i = 0; i < bullets; i++) {
@@ -96,5 +100,11 @@ export default class UI extends Phaser.Scene
     private changeWeapon(value)
     {   
         this.weaponText.text = `${value}`
+    }
+
+    private handleHealthChanged(value: number)
+    {
+        this.health = value
+        this.setInterface(this.health, this.stamina, this.bullet)
     }
 }

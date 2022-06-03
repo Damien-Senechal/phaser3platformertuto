@@ -138,6 +138,13 @@ export default class Level extends Phaser.Scene
                     this.ennemies.add('corner', corner)
                     break
                 }
+                case 'Checkpoint':
+                {
+                    let checkpoint = this.matter.add.sprite(x, y, 'Checkpoint', 0, {
+                        isStatic: true,
+                        label: 'Checkpoint'
+                    })
+                }
             }
         })
     }
