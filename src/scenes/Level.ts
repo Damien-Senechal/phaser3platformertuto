@@ -16,6 +16,7 @@ export default class Level extends Phaser.Scene
     private screenWidth
     private pigs: PigController[] = []
     private pigId = 0
+    private tumbleweedTime = 0
 
     constructor()
     {
@@ -176,7 +177,35 @@ d
         {
             this.cameras.main.stopFollow()
         }
+        this.tumbleweed(t)
         //console.log(this.pigs)
         //console.log(this.elijah.x)
+    }
+
+    tumbleweed(dt: number)
+    {
+        if(this.tumbleweedTime === 0)
+        {
+            this.tumbleweedTime = dt + 10000
+        }
+        else if(dt >= this.tumbleweedTime)
+        {
+            let tumbleweed = this.matter.add.sprite(this.elijah.x + 300, this.elijah.y, 'tumbleweed', 0,  {
+                friction:0,
+                frictionAir:0,
+                frictionStatic:0
+            })
+            tumbleweed.setBody({
+                type: 'circle',
+                radius: 10
+            });
+            tumbleweed.setVelocityX(-5)
+            this.time.delayedCall(9000, () => {
+                tumbleweed.destroy()
+            })
+            this.tumbleweedTime = 0
+        }
+
+        //this.matter.add.circle(this.elijah.x, this.elijah.y, 20)
     }
 }

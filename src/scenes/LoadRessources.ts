@@ -12,6 +12,7 @@ export default class LoadRessources
         scene.load.image('Pig', 'ressources/sprite/pig.png')
         scene.load.image('Sensor', 'ressources/sprite/sensor.png')
         scene.load.image('Checkpoint', 'ressources/sprite/checkpoint.png')
+        scene.load.image('tumbleweed', 'ressources/sprite/tumbleweed.png')
 
     }
 }
