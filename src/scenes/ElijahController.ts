@@ -33,6 +33,8 @@ export default class PlayerController
     private canShoot
     private checkpoint
     private bullets = 5
+    private trunk!: Phaser.GameObjects.Sprite
+    private angle
 
     constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke, ennemies: EnnemiesController)
     {
@@ -241,6 +243,12 @@ export default class PlayerController
         //console.log(this.activeWeapon)
         this.changeWeapon()
         //console.log(this.checkpoint)
+        if(this.rope)
+        {
+            this.angle = Phaser.Math.Angle.Between(this.sprite.x, this.sprite.y, this.rope.bodyB.position.x, this.rope.bodyB.position.y)
+        }
+        
+        console.log(this.angle)
         
     }
 
@@ -399,11 +407,19 @@ export default class PlayerController
 
     private grappleOnEnter()
     {
-        this.sprite.play('jumpUP')
+        this.sprite.play('jumpUPGrapple')
+        this.trunk = this.scene.add.sprite(this.sprite.x, this.sprite.y, 'Elijah-trunk')
     }
 
     private grappleOnUpdate()
     {
+        this.trunk.x = this.sprite.x
+        this.trunk.y = this.sprite.y
+        this.trunk.flipX = !this.sprite.flipX
+
+        this.trunk.rotation = (this.angle+1.5)%3.14
+
+
         if(this.keySpace.isDown)
         {
             this.releaseHook()
@@ -430,13 +446,14 @@ export default class PlayerController
         if(!this.graphics)
         {
             this.graphics = this.scene.add.graphics();
+            this.graphics.setDepth(-1)
         }
         
         this.graphics.clear()
 
         if(this.rope)
         {
-            this.scene.matter.world.renderConstraint(this.rope, this.graphics, 0x00ff00, 1, 1, 1, 1, 1)
+            this.scene.matter.world.renderConstraint(this.rope, this.graphics, 0xa93b3b, 1, 2, 0, 0, 0)
         }
         
         
@@ -446,6 +463,7 @@ export default class PlayerController
     private grappleOnExit()
     {
         this.graphics.clear()
+        this.trunk.destroy()
     }
 
     private fallingOnEnter()
@@ -769,6 +787,38 @@ export default class PlayerController
         this.scene.anims.create({
             key: 'jumpTouch',
             frames: this.scene.anims.generateFrameNumbers('Elijah', { frames: [ 13, 14 ] }),
+            frameRate: 10,
+            repeat: 0
+        });
+
+
+        this.scene.anims.create({
+            key: 'idleGrapple',
+            frames: this.scene.anims.generateFrameNumbers('ElijahGrapple', { frames: [0, 1, 2, 3, 4 ] }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'walkGrapple',
+            frames: this.scene.anims.generateFrameNumbers('ElijahGrapple', { frames: [ 5, 6, 7, 8, 9, 10 ] }),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'jumpUPGrapple',
+            frames: this.scene.anims.generateFrameNumbers('ElijahGrapple', { frames: [ 11 ] }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'jumpDownGrapple',
+            frames: this.scene.anims.generateFrameNumbers('ElijahGrapple', { frames: [ 12 ] }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'jumpTouchGrapple',
+            frames: this.scene.anims.generateFrameNumbers('ElijahGrapple', { frames: [ 13, 14 ] }),
             frameRate: 10,
             repeat: 0
         });

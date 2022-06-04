@@ -9,10 +9,12 @@ export default class LoadRessources
         scene.load.tilemapTiledJSON('tilemap', 'ressources/json/part1.json')
         scene.load.tilemapTiledJSON('tilemap2', 'ressources/json/part3.json')
         scene.load.spritesheet('Elijah', 'ressources/sprite/Elijah_idle-Sheet.png', { frameWidth: 32, frameHeight: 32 });
+        scene.load.spritesheet('ElijahGrapple', 'ressources/sprite/Elijah_hook-Sheet.png', { frameWidth: 32, frameHeight: 32 });
         scene.load.image('Pig', 'ressources/sprite/pig.png')
         scene.load.image('Sensor', 'ressources/sprite/sensor.png')
         scene.load.image('Checkpoint', 'ressources/sprite/checkpoint.png')
         scene.load.image('tumbleweed', 'ressources/sprite/tumbleweed.png')
+        scene.load.image('Elijah-trunk', 'ressources/sprite/Elijah_trunk.png')
 
     }
 }
