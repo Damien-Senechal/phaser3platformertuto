@@ -9,6 +9,8 @@ export default class UI extends Phaser.Scene
     private weaponText
     private weaponIcon
 
+    private bulletsSprite: Phaser.Sprite[] = []
+
     private health = 100
     private stamina = 100
     private bullet = 5
@@ -49,11 +51,15 @@ export default class UI extends Phaser.Scene
 
         events.on('weapon-changed', this.changeWeapon, this)
         events.on('health-changed', this.handleHealthChanged, this)
+        events.on('bullets-changed', this.handleBulletsChanged, this)
 
         /*this.weaponText = this.add.text(540, 10, 'allo', {
             color: '#000000'
         })*/
         this.weaponIcon = this.add.image(600, 20, 'blade-icon')
+        for (let i = 1; i < this.bullet; i++) {
+            this.bulletsSprite.push(this.add.sprite(54+i*10, 36, 'bullet-icon').setScale(2))
+        }
     }
 
     update() 
@@ -95,9 +101,15 @@ export default class UI extends Phaser.Scene
             this.graphics.fillRoundedRect(50, 21, width*percent2, 7, 5)
         }
 
-        for (let i = 0; i < bullets; i++) {
-            this.add.sprite(54+i*10, 36, 'bullet-icon').setScale(2)
+        if(bullets > this.bulletsSprite.length)
+        {
+            this.bulletsSprite.push(this.add.sprite(54+this.bulletsSprite.length*10, 36, 'bullet-icon').setScale(2))
         }
+        else if(bullets < this.bulletsSprite.length)
+        {
+            this.bulletsSprite.pop().destroy()
+        }
+        console.log(this.bulletsSprite)
 
         
     }
@@ -123,6 +135,12 @@ export default class UI extends Phaser.Scene
     private handleHealthChanged(value: number)
     {
         this.health = value
+        this.setInterface(this.health, this.stamina, this.bullet)
+    }
+
+    private handleBulletsChanged(value: number)
+    {
+        this.bullet = value
         this.setInterface(this.health, this.stamina, this.bullet)
     }
 }

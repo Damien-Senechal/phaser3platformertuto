@@ -32,6 +32,7 @@ export default class PlayerController
     private canBlade
     private canShoot
     private checkpoint
+    private bullets = 5
 
     constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke, ennemies: EnnemiesController)
     {
@@ -208,7 +209,10 @@ export default class PlayerController
             }
             else if(this.activeWeapon === 'Pistol')
             {
-                this.shootPistol(pointer)
+                if(this.bullets>0)
+                {
+                    this.shootPistol(pointer)
+                }
             }
         })
 
@@ -582,6 +586,9 @@ export default class PlayerController
 
     private shootOnEnter()
     {
+        this.bullets -= 1
+        this.setBullets(this.bullets)
+        console.log(this.bullets)
         this.stateMachine.setState('idle')
     }
 
@@ -832,6 +839,15 @@ export default class PlayerController
         {
             this.stateMachine.setState('dead')
         }
+    }
+
+    private setBullets(value : number){
+        this.bullets = value
+        if(this.bullets < 0)
+        {
+            this.bullets = 0
+        }
+        events.emit('bullets-changed', this.bullets)
     }
 
     private respawn()
