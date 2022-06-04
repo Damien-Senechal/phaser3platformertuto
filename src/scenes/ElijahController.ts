@@ -415,7 +415,13 @@ export default class PlayerController
     {
         this.trunk.x = this.sprite.x
         this.trunk.y = this.sprite.y
-        this.trunk.flipX = !this.sprite.flipX
+        if(this.sprite.flipX)
+        {
+            this.trunk.setTexture('Elijah-trunk')
+        }
+        else{
+            this.trunk.setTexture('Elijah-trunkflip')
+        }
 
         this.trunk.rotation = (this.angle+1.5)%3.14
 
@@ -453,7 +459,7 @@ export default class PlayerController
 
         if(this.rope)
         {
-            this.scene.matter.world.renderConstraint(this.rope, this.graphics, 0xa93b3b, 1, 2, 0, 0, 0)
+            this.scene.matter.world.renderConstraint(this.rope, this.graphics, 0xa93b3b, 1, 1, 0, 0, 0)
         }
         
         

@@ -15,6 +15,7 @@ export default class LoadRessources
         scene.load.image('Checkpoint', 'ressources/sprite/checkpoint.png')
         scene.load.image('tumbleweed', 'ressources/sprite/tumbleweed.png')
         scene.load.image('Elijah-trunk', 'ressources/sprite/Elijah_trunk.png')
+        scene.load.image('Elijah-trunkflip', 'ressources/sprite/Elijah_trunk_flip.png')
 
     }
 }
