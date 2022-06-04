@@ -193,7 +193,7 @@ d
             let tumbleweed = this.matter.add.sprite(this.elijah.x + 300, this.elijah.y, 'tumbleweed', 0,  {
                 friction:0,
                 frictionAir:0,
-                frictionStatic:0
+                frictionStatic:0,
             })
             tumbleweed.setBody({
                 type: 'circle',
