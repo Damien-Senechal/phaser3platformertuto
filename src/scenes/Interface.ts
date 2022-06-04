@@ -7,6 +7,7 @@ export default class UI extends Phaser.Scene
 
     private elijahPortrait
     private weaponText
+    private weaponIcon
 
     private health = 100
     private stamina = 100
@@ -28,6 +29,9 @@ export default class UI extends Phaser.Scene
     {
         this.load.spritesheet('Elijah-Portrait', 'ressources/sprite/Elijah_portrait_idle-Sheet.png', { frameWidth: 32, frameHeight: 32 });
         this.load.image('bullet-icon', 'ressources/sprite/bullet_icon.png')
+        this.load.image('blade-icon', 'ressources/sprite/blade_icon.png')
+        this.load.image('pistol-icon', 'ressources/sprite/pistol_icon.png')
+        this.load.image('hook-icon', 'ressources/sprite/hook_icon.png')
     }
 
     create()
@@ -46,9 +50,10 @@ export default class UI extends Phaser.Scene
         events.on('weapon-changed', this.changeWeapon, this)
         events.on('health-changed', this.handleHealthChanged, this)
 
-        this.weaponText = this.add.text(540, 10, 'allo', {
+        /*this.weaponText = this.add.text(540, 10, 'allo', {
             color: '#000000'
-        })
+        })*/
+        this.weaponIcon = this.add.image(600, 20, 'blade-icon')
     }
 
     update() 
@@ -91,7 +96,7 @@ export default class UI extends Phaser.Scene
         }
 
         for (let i = 0; i < bullets; i++) {
-            this.add.image(54+i*10, 36, 'bullet-icon').setScale(2)
+            this.add.sprite(54+i*10, 36, 'bullet-icon').setScale(2)
         }
 
         
@@ -99,7 +104,20 @@ export default class UI extends Phaser.Scene
 
     private changeWeapon(value)
     {   
-        this.weaponText.text = `${value}`
+        //this.weaponText.text = `${value}`
+        this.weaponIcon.destroy()
+        if(value === 'Blade')
+        {
+            this.weaponIcon = this.add.sprite(580, 20, 'blade-icon').setScale(2)
+        }
+        else if(value === 'Pistol')
+        {
+            this.weaponIcon = this.add.sprite(580, 20, 'pistol-icon').setScale(2)
+        }
+        else if(value === 'Hook')
+        {
+            this.weaponIcon = this.add.sprite(580, 20, 'hook-icon').setScale(2)
+        }
     }
 
     private handleHealthChanged(value: number)
