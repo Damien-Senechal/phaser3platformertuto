@@ -27,7 +27,7 @@ export default class PlayerController
     private activeWeapon
     private activeWeaponSelection
     private lastPig
-    private hitbox
+    private hitbox: MatterJS.BodyType
     private bullet
     private canBlade
     private canShoot
@@ -121,6 +121,9 @@ export default class PlayerController
                 onExit: this.parryOnExit
 
             })
+            .addState('change-weapon', {
+                onEnter: this.changeWeaponOnEnter
+            })
             .setState('falling')
 
             this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
@@ -178,13 +181,19 @@ export default class PlayerController
 
             this.scene.matter.world.on('collisionstart', (event, b1, b2) => {
                 for (var i = 0; i < event.pairs.length; i++) {
-                    if(b2.label === 'hitbox-attack' && b1.label === 'pig')
+                    if(b2.label === 'hitbox-attack' && b1.label === 'pig-hitbox')
                     {
                         this.lastPig = b1.gameObject
                         events.emit('pig-killed',this.lastPig)
                         return
                     }
-                    if(b2.label === 'hitbox-shoot' && b1.label === 'pig')
+                    if(b1.label === 'hitbox-attack' && b2.label === 'pig-hitbox')
+                    {
+                        this.lastPig = b1.gameObject
+                        events.emit('pig-killed',this.lastPig)
+                        return
+                    }
+                    if(b2.label === 'hitbox-shoot' && b1.label === 'pig-hitbox')
                     {
                         this.scene.matter.world.remove(b2);
                         this.lastPig = b1.gameObject
@@ -194,10 +203,65 @@ export default class PlayerController
                 }
             }, this);
 
+            this.scene.matter.world.on('oncollide', (event, b1, b2) => {
+                for (var i = 0; i < event.pairs.length; i++) {
+                    if(b2.label === 'hitbox-attack' && b1.label === 'pig-hitbox')
+                    {
+                        this.lastPig = b1.gameObject
+                        events.emit('pig-killed',this.lastPig)
+                        return
+                    }
+                    if(b1.label === 'hitbox-attack' && b2.label === 'pig-hitbox')
+                    {
+                        this.lastPig = b1.gameObject
+                        events.emit('pig-killed',this.lastPig)
+                        return
+                    }
+                    if(b2.label === 'hitbox-shoot' && b1.label === 'pig-hitbox')
+                    {
+                        this.scene.matter.world.remove(b2);
+                        this.lastPig = b1.gameObject
+                        events.emit('pig-killed',this.lastPig)
+                        return
+                    }
+                }
+            }, this);
+
+            this.scene.matter.world.on('collisionend', (event, b1, b2) => {
+                for (var i = 0; i < event.pairs.length; i++) {
+                    if(b2.label === 'hitbox-attack' && b1.label === 'pig-hitbox')
+                    {
+                        this.lastPig = b1.gameObject
+                        events.emit('pig-killed',this.lastPig)
+                        return
+                    }
+                    if(b1.label === 'hitbox-attack' && b2.label === 'pig-hitbox')
+                    {
+                        this.lastPig = b1.gameObject
+                        events.emit('pig-killed',this.lastPig)
+                        return
+                    }
+                    if(b2.label === 'hitbox-shoot' && b1.label === 'pig-hitbox')
+                    {
+                        this.scene.matter.world.remove(b2);
+                        this.lastPig = b1.gameObject
+                        events.emit('pig-killed',this.lastPig)
+                        return
+                    }
+                }
+            }, this);
+
+
             this.scene.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
+
                 this.activeWeaponSelection+=deltaY
+
                 this.activeWeaponSelection=this.activeWeaponSelection%300
+
                 events.emit('weapon-changed', this.activeWeapon)
+
+                this.stateMachine.setState('change-weapon')
+
             }, this);
 
         this.scene.input.on("pointerup", (pointer) => {
@@ -248,7 +312,7 @@ export default class PlayerController
             this.angle = Phaser.Math.Angle.Between(this.sprite.x, this.sprite.y, this.rope.bodyB.position.x, this.rope.bodyB.position.y)
         }
         
-        console.log(this.angle)
+        //console.log(this.angle)
         
     }
 
@@ -259,7 +323,15 @@ export default class PlayerController
         {
             this.sprite.setVelocityY(0)
         }
-        this.sprite.play('idle')
+
+        if(this.activeWeapon === 'Hook')
+        {
+            this.sprite.play('idle')
+        }
+        else if(this.activeWeapon === 'Blade')
+        {
+            this.sprite.play('idleBlade')
+        }
     }
 
     private idleOnUpdate()
@@ -290,7 +362,14 @@ export default class PlayerController
 
     private walkOnEnter()
     {
-        this.sprite.play('walk')
+        if(this.activeWeapon === 'Hook')
+        {
+            this.sprite.play('walk')
+        }
+        else if(this.activeWeapon === 'Blade')
+        {
+            this.sprite.play('walkBlade')
+        }
 
         if(this.sprite.flipX)
         {
@@ -361,7 +440,14 @@ export default class PlayerController
     private jumpOnEnter()
     {
         this.isGrounded = false
-        this.sprite.play('jumpUP')
+        if(this.activeWeapon === 'Hook')
+        {
+            this.sprite.play('jumpUP')
+        }
+        else if(this.activeWeapon === 'Blade')
+        {
+            this.sprite.play('jumpUPBlade')
+        }
         
         this.smoke.createEmitter({
             speed:25,
@@ -459,7 +545,7 @@ export default class PlayerController
 
         if(this.rope)
         {
-            this.scene.matter.world.renderConstraint(this.rope, this.graphics, 0xa93b3b, 1, 1, 0, 0, 0)
+            this.scene.matter.world.renderConstraint(this.rope, this.graphics, 0xe6482e, 1, 1, 0, 0, 0)
         }
         
         
@@ -474,7 +560,14 @@ export default class PlayerController
 
     private fallingOnEnter()
     {
-        this.sprite.play('jumpDown')
+        if(this.activeWeapon === 'Hook')
+        {
+            this.sprite.play('jumpDown')
+        }
+        else if(this.activeWeapon === 'Blade')
+        {
+            this.sprite.play('jumpDownBlade')
+        }
         this.isGrounded = false
     }
 
@@ -506,12 +599,13 @@ export default class PlayerController
 
     private attackOnEnter()
     {
+        this.sprite.play('attackBlade')
         if(this.canBlade)
         {
             this.canBlade = false
             if(this.sprite.flipX)
             {
-                this.hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x-22, this.sprite.body.position.y-2, 32, 16, {
+                this.hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x, this.sprite.body.position.y-2, 16, 16, {
                     isSensor:true,
                     isStatic: false,
                     ignoreGravity: true,
@@ -519,26 +613,29 @@ export default class PlayerController
                 })
             }
             else{
-                this.hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x+22, this.sprite.body.position.y-2, 32, 16, {
+                this.hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x, this.sprite.body.position.y-2, 13, 16, {
                     isSensor:true,
                     isStatic: false,
                     ignoreGravity: true,
                     label:'hitbox-attack'
                 })
             }
-            this.sprite.setStatic(true)
-            this.stateMachine.setState('idle')
+            //this.sprite.setStatic(true)
             this.scene.time.delayedCall(100, () => {
+                //this.sprite.setStatic(false)
                 this.scene.matter.world.remove(this.hitbox);
-                this.sprite.setStatic(false)
             })
-            this.scene.time.delayedCall(500, () => {
+            this.scene.time.delayedCall(300, () => {
                 this.canBlade = true
+                this.stateMachine.setState('idle')
             })
-        }
+            /*this.scene.time.delayedCall(1000, () => {
+                this.canBlade = true
+            })*/
+        }  
         else{
             this.stateMachine.setState('idle')
-        }
+        } 
         /*this.scene.time.delayedCall(1000, () => {
             this.canBlade = true
         })*/
@@ -547,11 +644,14 @@ export default class PlayerController
     private attackOnUpdate()
     {
         
+        /*else{
+            this.sprite.play('attackBlade')
+            this.stateMachine.setState('idle')
+        }*/
     }
 
     private attackOnExit()
     {
-
     }
 
     private pigOnEnter()
@@ -612,7 +712,7 @@ export default class PlayerController
     {
         this.bullets -= 1
         this.setBullets(this.bullets)
-        console.log(this.bullets)
+        //console.log(this.bullets)
         this.stateMachine.setState('idle')
     }
 
@@ -705,6 +805,12 @@ export default class PlayerController
         })
 
         //console.log('WE HAVE PARRY')
+    }
+
+    private changeWeaponOnEnter()
+    {
+        //console.log('Weapon Changed !')
+        this.stateMachine.setState('idle')
     }
 
     private inputManager()
@@ -825,6 +931,43 @@ export default class PlayerController
         this.scene.anims.create({
             key: 'jumpTouchGrapple',
             frames: this.scene.anims.generateFrameNumbers('ElijahGrapple', { frames: [ 13, 14 ] }),
+            frameRate: 10,
+            repeat: 0
+        });
+
+        this.scene.anims.create({
+            key: 'idleBlade',
+            frames: this.scene.anims.generateFrameNumbers('ElijahBlade', { frames: [0, 1, 2, 3, 4 ] }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'walkBlade',
+            frames: this.scene.anims.generateFrameNumbers('ElijahBlade', { frames: [ 5, 6, 7, 8, 9, 10 ] }),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'jumpUPBlade',
+            frames: this.scene.anims.generateFrameNumbers('ElijahBlade', { frames: [ 11 ] }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'jumpDownBlade',
+            frames: this.scene.anims.generateFrameNumbers('ElijahBlade', { frames: [ 12 ] }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'jumpTouchBlade',
+            frames: this.scene.anims.generateFrameNumbers('ElijahBlade', { frames: [ 13, 14 ] }),
+            frameRate: 10,
+            repeat: 0
+        });
+        this.scene.anims.create({
+            key: 'attackBlade',
+            frames: this.scene.anims.generateFrameNumbers('ElijahBlade', { frames: [ 15, 16, 17, 18, 19 ] }),
             frameRate: 10,
             repeat: 0
         });

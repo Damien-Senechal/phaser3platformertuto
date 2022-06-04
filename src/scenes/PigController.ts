@@ -37,12 +37,16 @@ export default class PigController
             isSensor: false,
             label: 'pig'
         })
+        const pigHitBox = this.scene.matter.bodies.circle(sprite.x, sprite.y, 15, {
+            isSensor: true,
+            label: 'pig-hitbox'
+        })
         pigController.sensors.center = this.scene.matter.bodies.rectangle(sprite.x, sprite.y, 200, 10, {
             isSensor:true,
             label: 'detection-zone'
         })
         const compoudPig = this.scene.matter.body.create({
-            parts:[pigBody, pigController.sensors.center ]
+            parts:[pigBody, pigHitBox, pigController.sensors.center ]
         })
         pigController.sprite.setExistingBody(compoudPig)
         pigController.sprite.setFixedRotation()

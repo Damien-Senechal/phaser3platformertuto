@@ -9,7 +9,7 @@ export default class UI extends Phaser.Scene
     private weaponText
     private weaponIcon
 
-    private bulletsSprite: Phaser.Sprite[] = []
+    private bulletsSprite?: Phaser.GameObjects.Sprite[] = []
 
     private health = 100
     private stamina = 100
@@ -109,7 +109,7 @@ export default class UI extends Phaser.Scene
         {
             this.bulletsSprite.pop().destroy()
         }
-        console.log(this.bulletsSprite)
+        //console.log(this.bulletsSprite)
 
         
     }
