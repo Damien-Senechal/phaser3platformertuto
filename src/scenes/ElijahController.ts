@@ -1,8 +1,9 @@
-import { BodyType, Events } from 'matter'
+import { Events } from 'matter'
 import Phaser, { BlendModes } from 'phaser'
 import StateMachine from '~/statemachine/StateMachine'
 import EnnemiesController from './EnnemiesController'
 import { sharedInstance as events} from './EventCenter'
+import * as MatterJS from 'matter-js'
 
 type CursorKeys = Phaser.Types.Input.Keyboard.CursorKeys
 
@@ -27,7 +28,8 @@ export default class PlayerController
     private activeWeapon
     private activeWeaponSelection
     private lastPig
-    private hitbox: MatterJS.BodyType
+    private hitbox
+    private isSlashing
     private bullet
     private canBlade
     private canShoot
@@ -35,6 +37,7 @@ export default class PlayerController
     private bullets = 5
     private trunk!: Phaser.GameObjects.Sprite
     private angle
+    private hitboxTouch
 
     constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke, ennemies: EnnemiesController)
     {
@@ -54,11 +57,13 @@ export default class PlayerController
             x:this.sprite.x, 
             y:this.sprite.y
         }
+        this.isSlashing = false
+        this.hitboxTouch = false
         
-        /*this.hitbox = this.scene.matter.add.rectangle(0, 0, 32, 16, {
+        /*this.hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x+20, this.sprite.body.position.y-2, 2, 2, {
             isSensor:true,
             isStatic: false,
-            ignoreGravity: false,
+            ignoreGravity: true,
             label:'hitbox-attack'
         })*/
         
@@ -70,8 +75,63 @@ export default class PlayerController
         this.rope = null
         this.bullet = null
 
+        const elijahController = {
+            sprite,
+            sensors: {
+                blade: MatterJS.BodyType,
+                down: MatterJS.BodyType,
+                up: MatterJS.BodyType,
+                left: MatterJS.BodyType,
+                right: MatterJS.BodyType
+            }
+        }
+        const elijahBody = this.scene.matter.bodies.rectangle(sprite.x, sprite.y, 11, 13, {
+            isSensor: false,
+            label: 'Elijah'
+        })
 
-        //this.scene.input.on("pointerdown", this.fireHook, this.scene)
+        /*elijahController.sensors.blade = this.scene.matter.bodies.rectangle(sprite.x+20, sprite.y-2, 16, 16, {
+            isSensor: true,
+            label: 'hitbox-attack'
+        })*/
+
+        elijahController.sensors.down = this.scene.matter.bodies.rectangle(sprite.x, sprite.y+10, 3, 5,{
+            isSensor: true,
+            label: 'hitbox-down'
+        })
+
+        elijahController.sensors.up = this.scene.matter.bodies.rectangle(sprite.x, sprite.y-10, 3, 5,{
+            isSensor: true,
+            label: 'hitbox-up'
+        })
+
+        elijahController.sensors.left = this.scene.matter.bodies.rectangle(sprite.x+9, sprite.y, 5, 3,{
+            isSensor: true,
+            label: 'hitbox-left'
+        })
+
+        elijahController.sensors.right = this.scene.matter.bodies.rectangle(sprite.x-9, sprite.y, 5, 3,{
+            isSensor: true,
+            label: 'hitbox-right'
+        })
+        
+        const compoundElijah = this.scene.matter.body.create({
+            parts: [
+                    elijahBody,
+                    //elijahController.sensors.blade,
+                    elijahController.sensors.up,
+                    elijahController.sensors.down,
+                    elijahController.sensors.left,
+                    elijahController.sensors.right
+                ],
+            restitution: 0.05
+        })
+        elijahController.sprite.setExistingBody(compoundElijah)
+        elijahController.sprite.setFixedRotation()
+        elijahController.sprite.setFriction(1)
+
+
+
 
         this.stateMachine = new StateMachine(this, 'player')
 
@@ -126,7 +186,7 @@ export default class PlayerController
             })
             .setState('falling')
 
-            this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
+            /*this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
                 const bodyA = data.bodyA as MatterJS.BodyType
                 const bodyB = data.bodyB as MatterJS.BodyType
                 const gameObjectA = bodyA
@@ -177,46 +237,34 @@ export default class PlayerController
                 //console.log(bodyB.label)
                 this.scene.scene.start('fort')
             }
-            })
+            })*/
 
             this.scene.matter.world.on('collisionstart', (event, b1, b2) => {
                 for (var i = 0; i < event.pairs.length; i++) {
-                    if(b2.label === 'hitbox-attack' && b1.label === 'pig-hitbox')
-                    {
-                        this.lastPig = b1.gameObject
-                        events.emit('pig-killed',this.lastPig)
-                        return
-                    }
-                    if(b1.label === 'hitbox-attack' && b2.label === 'pig-hitbox')
-                    {
-                        this.lastPig = b1.gameObject
-                        events.emit('pig-killed',this.lastPig)
-                        return
-                    }
-                    if(b2.label === 'hitbox-shoot' && b1.label === 'pig-hitbox')
-                    {
-                        this.scene.matter.world.remove(b2);
-                        this.lastPig = b1.gameObject
-                        events.emit('pig-killed',this.lastPig)
-                        return
-                    }
-                }
-            }, this);
 
-            this.scene.matter.world.on('oncollide', (event, b1, b2) => {
-                for (var i = 0; i < event.pairs.length; i++) {
+                    //collision blade *start*
+
                     if(b2.label === 'hitbox-attack' && b1.label === 'pig-hitbox')
                     {
                         this.lastPig = b1.gameObject
-                        events.emit('pig-killed',this.lastPig)
+                        //events.emit('pig-killed',this.lastPig)
+                        this.hitboxTouch = true
+                        console.log(this.hitboxTouch)
                         return
                     }
                     if(b1.label === 'hitbox-attack' && b2.label === 'pig-hitbox')
                     {
-                        this.lastPig = b1.gameObject
-                        events.emit('pig-killed',this.lastPig)
+                        this.lastPig = b2.gameObject
+                        //events.emit('pig-killed',this.lastPig)
+                        this.hitboxTouch = true
+                        console.log(this.hitboxTouch)
                         return
                     }
+
+                    //collision blade *end*
+
+                    //collision bullet *start*
+
                     if(b2.label === 'hitbox-shoot' && b1.label === 'pig-hitbox')
                     {
                         this.scene.matter.world.remove(b2);
@@ -224,6 +272,62 @@ export default class PlayerController
                         events.emit('pig-killed',this.lastPig)
                         return
                     }
+                    if(b1.label === 'hitbox-shoot' && b2.label === 'pig-hitbox')
+                    {
+                        this.scene.matter.world.remove(b2);
+                        this.lastPig = b1.gameObject
+                        events.emit('pig-killed',this.lastPig)
+                        return
+                    }
+                    
+                    // Elijah Collision *start*
+
+                    if(b1.label === 'Elijah' && b2.label === 'pig')
+                    {
+                        this.lastPig = b2.gameObject
+                        this.stateMachine.setState('pig-hit')
+                        return
+                    }
+
+                    /*if((b1.label === 'ground' && b2.label === 'Elijah') || (b1.label === 'corner' && b2.label === 'Elijah'))
+                    {
+                    
+                        this.sprite.body.velocity.y = 0
+                        if(this.stateMachine.isCurrentState('jump'))
+                        {
+                            this.stateMachine.setState('idle')
+                        }
+                        if(this.stateMachine.isCurrentState('falling'))
+                        {
+                            this.isGrounded = true
+                            this.stateMachine.setState('idle')
+                        }          
+                    }*/
+
+                    if(b1 === elijahController.sensors.down || b2 === elijahController.sensors.down)
+                    {
+                        this.isGrounded = true
+                        console.log('on touche le sol')
+                        return
+                    }
+
+                    if(b1.label === 'Elijah' && b2.label === 'Checkpoint')
+                    {
+                    //console.log(bodyB.label)
+                        this.checkpoint = {
+                            x:b2.position.x,
+                            y:b2.position.y,
+                            }
+                        return
+                    }
+                    if(b1.label === 'Elijah' && b2.label === 'End')
+                    {
+                        //console.log(bodyB.label)
+                        this.scene.scene.start('fort')
+                        return
+                    }
+
+                    // Elijah Collision *end*
                 }
             }, this);
 
@@ -232,13 +336,17 @@ export default class PlayerController
                     if(b2.label === 'hitbox-attack' && b1.label === 'pig-hitbox')
                     {
                         this.lastPig = b1.gameObject
-                        events.emit('pig-killed',this.lastPig)
+                        //events.emit('pig-killed',this.lastPig)
+                        this.hitboxTouch = false
+                        console.log(this.hitboxTouch)
                         return
                     }
                     if(b1.label === 'hitbox-attack' && b2.label === 'pig-hitbox')
                     {
-                        this.lastPig = b1.gameObject
-                        events.emit('pig-killed',this.lastPig)
+                        this.lastPig = b2.gameObject
+                        //events.emit('pig-killed',this.lastPig)
+                        this.hitboxTouch = false
+                        console.log(this.hitboxTouch)
                         return
                     }
                     if(b2.label === 'hitbox-shoot' && b1.label === 'pig-hitbox')
@@ -246,6 +354,13 @@ export default class PlayerController
                         this.scene.matter.world.remove(b2);
                         this.lastPig = b1.gameObject
                         events.emit('pig-killed',this.lastPig)
+                        return
+                    }
+
+                    if(b1 === elijahController.sensors.down || b2 === elijahController.sensors.down)
+                    {   
+                        this.isGrounded = false
+                        console.log('on sort du sol')
                         return
                     }
                 }
@@ -311,19 +426,28 @@ export default class PlayerController
         {
             this.angle = Phaser.Math.Angle.Between(this.sprite.x, this.sprite.y, this.rope.bodyB.position.x, this.rope.bodyB.position.y)
         }
-        
+        //console.log(this.hitbox)
+        //this.hitbox.velocity.x = this.sprite.body.velocity.x
+        //this.hitbox.velocity.y = this.sprite.body.velocity.y
+        /*this.hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x+20, this.sprite.body.position.y-2, 2, 2, {
+            isSensor:true,
+            isStatic: false,
+            ignoreGravity: true,
+            label:'hitbox-attack'
+        })*/
         //console.log(this.angle)
+        if(this.hitboxTouch && this.isSlashing)
+        {
+            events.emit('pig-killed',this.lastPig)
+        }
+
+        console.log(this.isGrounded)
         
     }
 
 
     private idleOnEnter()
     {
-        if(this.stateMachine.previousStateName === 'falling')
-        {
-            this.sprite.setVelocityY(0)
-        }
-
         if(this.activeWeapon === 'Hook')
         {
             this.sprite.play('idle')
@@ -336,7 +460,6 @@ export default class PlayerController
 
     private idleOnUpdate()
     {
-        this.refY = this.sprite.y
         if(this.keyD.isDown || this.keyQ.isDown)
         {
             this.stateMachine.setState('walk')
@@ -404,9 +527,8 @@ export default class PlayerController
     {
         const speed = 2.5
 
-        if(this.sprite.body.velocity.y > 0 && this.isGrounded && (this.refY+.5 < this.sprite.y || this.refY-.5 > this.sprite.y))
+        if(this.isGrounded === false)
         {
-            this.isGrounded = false
             this.stateMachine.setState('falling')
         }
 
@@ -439,7 +561,7 @@ export default class PlayerController
 
     private jumpOnEnter()
     {
-        this.isGrounded = false
+        //this.isGrounded = false
         if(this.activeWeapon === 'Hook')
         {
             this.sprite.play('jumpUP')
@@ -488,11 +610,12 @@ export default class PlayerController
 
     private jumpOnExit()
     {
-
+        //this.isGrounded = true
     }
 
     private grappleOnEnter()
     {
+        //this.isGrounded = false
         this.sprite.play('jumpUPGrapple')
         this.trunk = this.scene.add.sprite(this.sprite.x, this.sprite.y, 'Elijah-trunk')
     }
@@ -526,7 +649,7 @@ export default class PlayerController
                 //console.log(distance)
                 if(distance > 16*2 && distance < 200)
                 {
-                    this.rope = this.scene.matter.add.constraint(this.sprite.body as BodyType, this.hook, distance, 0)
+                    this.rope = this.scene.matter.add.constraint(this.sprite.body as MatterJS.BodyType, this.hook, distance, 0)
                 }
                 else{
                     this.canFireHook = true
@@ -547,19 +670,18 @@ export default class PlayerController
         {
             this.scene.matter.world.renderConstraint(this.rope, this.graphics, 0xe6482e, 1, 1, 0, 0, 0)
         }
-        
-        
-        
     }
 
     private grappleOnExit()
     {
+        //this.isGrounded = true
         this.graphics.clear()
         this.trunk.destroy()
     }
 
     private fallingOnEnter()
     {
+        //this.isGrounded = false
         if(this.activeWeapon === 'Hook')
         {
             this.sprite.play('jumpDown')
@@ -568,7 +690,6 @@ export default class PlayerController
         {
             this.sprite.play('jumpDownBlade')
         }
-        this.isGrounded = false
     }
 
     private fallingOnUpdate()
@@ -593,56 +714,30 @@ export default class PlayerController
 
     private fallingOnExit()
     {
-        this.isGrounded = true
-        this.sprite.setVelocityY(0)
+        //this.isGrounded = true
     }
 
     private attackOnEnter()
     {
-        this.sprite.play('attackBlade')
+        
         if(this.canBlade)
         {
+            this.sprite.play('attackBlade')
+            this.isSlashing = true
             this.canBlade = false
-            if(this.sprite.flipX)
-            {
-                this.hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x, this.sprite.body.position.y-2, 16, 16, {
-                    isSensor:true,
-                    isStatic: false,
-                    ignoreGravity: true,
-                    label:'hitbox-attack'
-                })
-            }
-            else{
-                this.hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x, this.sprite.body.position.y-2, 13, 16, {
-                    isSensor:true,
-                    isStatic: false,
-                    ignoreGravity: true,
-                    label:'hitbox-attack'
-                })
-            }
-            //this.sprite.setStatic(true)
-            this.scene.time.delayedCall(100, () => {
-                //this.sprite.setStatic(false)
-                this.scene.matter.world.remove(this.hitbox);
-            })
             this.scene.time.delayedCall(300, () => {
                 this.canBlade = true
                 this.stateMachine.setState('idle')
             })
-            /*this.scene.time.delayedCall(1000, () => {
-                this.canBlade = true
-            })*/
         }  
         else{
             this.stateMachine.setState('idle')
-        } 
-        /*this.scene.time.delayedCall(1000, () => {
-            this.canBlade = true
-        })*/
+        }
     }
 
     private attackOnUpdate()
     {
+        //console.log(this.isSlashing)
         
         /*else{
             this.sprite.play('attackBlade')
@@ -652,6 +747,7 @@ export default class PlayerController
 
     private attackOnExit()
     {
+        this.isSlashing = false
     }
 
     private pigOnEnter()
@@ -719,8 +815,34 @@ export default class PlayerController
     private deadOnEnter()
     {
         //this.sprite.play('player-death')
-
-        this.sprite.setOnCollide(() => {})
+        
+        this.scene.matter.world.on('collisionstart', (event, b1, b2) => {
+            for (var i = 0; i < event.pairs.length; i++) {
+                if(b2.label === 'hitbox-attack' && b1.label === 'pig-hitbox')
+                {
+                    this.lastPig = b1.gameObject
+                    //events.emit('pig-killed',this.lastPig)
+                    this.hitboxTouch = true
+                    console.log(this.hitboxTouch)
+                    return
+                }
+                if(b1.label === 'hitbox-attack' && b2.label === 'pig-hitbox')
+                {
+                    this.lastPig = b2.gameObject
+                    //events.emit('pig-killed',this.lastPig)
+                    this.hitboxTouch = true
+                    console.log(this.hitboxTouch)
+                    return
+                }
+                if(b2.label === 'hitbox-shoot' && b1.label === 'pig-hitbox')
+                    {
+                        this.scene.matter.world.remove(b2);
+                        this.lastPig = b1.gameObject
+                        events.emit('pig-killed',this.lastPig)
+                        return
+                    }
+            }
+        }, this);
 
         this.scene.time.delayedCall(1500, () => {
             //this.scene.scene.start('game-over')
@@ -736,12 +858,39 @@ export default class PlayerController
 
     private deadOnExit()
     {
-        
+        this.hitboxTouch = false
+        console.log(this.hitboxTouch)
     }
 
     private parryOnEnter()
     {
-        this.sprite.setOnCollide(() => {})
+        this.scene.matter.world.on('collisionstart', (event, b1, b2) => {
+            for (var i = 0; i < event.pairs.length; i++) {
+                if(b2.label === 'hitbox-attack' && b1.label === 'pig-hitbox')
+                {
+                    this.lastPig = b1.gameObject
+                    //events.emit('pig-killed',this.lastPig)
+                    this.hitboxTouch = true
+                    console.log(this.hitboxTouch)
+                    return
+                }
+                if(b1.label === 'hitbox-attack' && b2.label === 'pig-hitbox')
+                {
+                    this.lastPig = b2.gameObject
+                    //events.emit('pig-killed',this.lastPig)
+                    this.hitboxTouch = true
+                    console.log(this.hitboxTouch)
+                    return
+                }
+                if(b2.label === 'hitbox-shoot' && b1.label === 'pig-hitbox')
+                    {
+                        this.scene.matter.world.remove(b2);
+                        this.lastPig = b1.gameObject
+                        events.emit('pig-killed',this.lastPig)
+                        return
+                    }
+            }
+        }, this);
         this.sprite.setStatic(true)
         this.scene.time.delayedCall(1000, () => {
             this.stateMachine.setState('idle')
@@ -751,58 +900,72 @@ export default class PlayerController
     private parryOnExit()
     {
         this.sprite.setStatic(false)
-        this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
-            const bodyA = data.bodyA as MatterJS.BodyType
-            const bodyB = data.bodyB as MatterJS.BodyType
-            const gameObjectA = bodyA
-            const gameObjectB = bodyB
-
-            //console.log(bodyB.label)
-
-            //dconsole.log(gameObjectA)
-            //console.log(gameObjectB)
-
-            if(!gameObjectA)
-            {
-                return
-            }
-
-            if(bodyB.label === 'pig')
-            {
-                this.lastPig = bodyB.gameObject
-                this.stateMachine.setState('pig-hit')
-            }
-
-            if(gameObjectA.label === 'ground' || gameObjectA.label === 'corner')
-            {
-                
-                this.sprite.body.velocity.y = 0
-                if(this.stateMachine.isCurrentState('jump'))
+        this.scene.matter.world.on('collisionstart', (event, b1, b2) => {
+            for (var i = 0; i < event.pairs.length; i++) {
+                if(b2.label === 'hitbox-attack' && b1.label === 'pig-hitbox')
                 {
-                    this.stateMachine.setState('idle')
+                    this.lastPig = b1.gameObject
+                    //events.emit('pig-killed',this.lastPig)
+                    this.hitboxTouch = true
+                    console.log(this.hitboxTouch)
+                    return
                 }
-                if(this.stateMachine.isCurrentState('falling'))
+                if(b1.label === 'hitbox-attack' && b2.label === 'pig-hitbox')
                 {
-                    this.isGrounded = true
-                    this.stateMachine.setState('idle')
-                }            
-                return
-            }
+                    this.lastPig = b2.gameObject
+                    //events.emit('pig-killed',this.lastPig)
+                    this.hitboxTouch = true
+                    console.log(this.hitboxTouch)
+                    return
+                }
+                if(b2.label === 'hitbox-shoot' && b1.label === 'pig-hitbox')
+                    {
+                        this.scene.matter.world.remove(b2);
+                        this.lastPig = b1.gameObject
+                        events.emit('pig-killed',this.lastPig)
+                        return
+                    }
+                
+                // Elijah Collision *start*
 
-            if(bodyB.label === 'Checkpoint')
-            {
+                if(b1.label === 'Elijah' && b2.label === 'pig')
+                {
+                    this.lastPig = b2.gameObject
+                    this.stateMachine.setState('pig-hit')
+                }
+
+                if((b1.label === 'ground' && b2.label === 'Elijah') || (b1.label === 'corner' && b2.label === 'Elijah'))
+                {
+                
+                    this.sprite.body.velocity.y = 0
+                    if(this.stateMachine.isCurrentState('jump'))
+                    {
+                        this.stateMachine.setState('idle')
+                    }
+                    if(this.stateMachine.isCurrentState('falling'))
+                    {
+                        //this.isGrounded = true
+                        this.stateMachine.setState('idle')
+                    }            
+                }
+
+                if(b1.label === 'Elijah' && b2.label === 'Checkpoint')
+                {
                 //console.log(bodyB.label)
                 this.checkpoint = {
-                    x:bodyB.position.x,
-                    y:bodyB.position.y,
+                    x:b2.position.x,
+                    y:b2.position.y,
                 }
-            }
-            if(bodyB.label === 'End')
-            {
+                }
+                if(b1.label === 'Elijah' && b2.label === 'End')
+                {
                 //console.log(bodyB.label)
                 this.scene.scene.start('fort')
+                }
+
+                // Elijah Collision *end*
             }
-        })
+        }, this);
 
         //console.log('WE HAVE PARRY')
     }
@@ -1060,57 +1223,169 @@ export default class PlayerController
         this.setHealth(110)
         this.stateMachine.setState('idle')
 
-        this.sprite.setOnCollide((data: MatterJS.ICollisionPair) => {
-            const bodyA = data.bodyA as MatterJS.BodyType
-            const bodyB = data.bodyB as MatterJS.BodyType
-            const gameObjectA = bodyA
-            const gameObjectB = bodyB
-
-            //console.log(bodyB.label)
-
-            //dconsole.log(gameObjectA)
-            //console.log(gameObjectB)
-
-            if(!gameObjectA)
-            {
-                return
-            }
-
-            if(bodyB.label === 'pig')
-            {
-                this.lastPig = bodyB.gameObject
-                this.stateMachine.setState('pig-hit')
-            }
-
-            if(gameObjectA.label === 'ground' || gameObjectA.label === 'corner')
-            {
-                
-                this.sprite.body.velocity.y = 0
-                if(this.stateMachine.isCurrentState('jump'))
+        this.scene.matter.world.on('collisionstart', (event, b1, b2) => {
+            for (var i = 0; i < event.pairs.length; i++) {
+                if(b2.label === 'hitbox-attack' && b1.label === 'pig-hitbox')
                 {
-                    this.stateMachine.setState('idle')
+                    this.lastPig = b1.gameObject
+                    //events.emit('pig-killed',this.lastPig)
+                    this.hitboxTouch = true
+                    console.log(this.hitboxTouch)
+                    return
                 }
-                if(this.stateMachine.isCurrentState('falling'))
+                if(b1.label === 'hitbox-attack' && b2.label === 'pig-hitbox')
                 {
-                    this.isGrounded = true
-                    this.stateMachine.setState('idle')
-                }            
-                return
-            }
+                    this.lastPig = b2.gameObject
+                    //events.emit('pig-killed',this.lastPig)
+                    this.hitboxTouch = true
+                    console.log(this.hitboxTouch)
+                    return
+                }
+                if(b2.label === 'hitbox-shoot' && b1.label === 'pig-hitbox')
+                    {
+                        this.scene.matter.world.remove(b2);
+                        this.lastPig = b1.gameObject
+                        events.emit('pig-killed',this.lastPig)
+                        return
+                    }
+                
+                // Elijah Collision *start*
 
-            if(bodyB.label === 'Checkpoint')
-            {
+                if(b1.label === 'Elijah' && b2.label === 'pig')
+                {
+                    this.lastPig = b2.gameObject
+                    this.stateMachine.setState('pig-hit')
+                }
+
+                if((b1.label === 'ground' && b2.label === 'Elijah') || (b1.label === 'corner' && b2.label === 'Elijah'))
+                {
+                
+                    this.sprite.body.velocity.y = 0
+                    if(this.stateMachine.isCurrentState('jump'))
+                    {
+                        this.stateMachine.setState('idle')
+                    }
+                    if(this.stateMachine.isCurrentState('falling'))
+                    {
+                        //this.isGrounded = true
+                        this.stateMachine.setState('idle')
+                    }            
+                }
+
+                if(b1.label === 'Elijah' && b2.label === 'Checkpoint')
+                {
                 //console.log(bodyB.label)
                 this.checkpoint = {
-                    x:bodyB.position.x,
-                    y:bodyB.position.y,
+                    x:b2.position.x,
+                    y:b2.position.y,
                 }
-            }
-            if(bodyB.label === 'End')
-            {
+                }
+                if(b1.label === 'Elijah' && b2.label === 'End')
+                {
                 //console.log(bodyB.label)
                 this.scene.scene.start('fort')
+                }
+
+                // Elijah Collision *end*
             }
-        })
+        }, this);
     }
 }
+
+
+
+
+
+/*private attackOnEnter()
+    {
+        
+        if(this.canBlade)
+        {
+            this.sprite.play('attackBlade')
+            this.isSlashing = true
+            this.canBlade = false
+            if(this.sprite.flipX)
+            {
+                this.hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x-20, this.sprite.body.position.y-2, 1, 1, {
+                    isSensor:true,
+                    isStatic: false,
+                    ignoreGravity: true,
+                    label:'hitbox-attack'
+                })
+                hitbox1 = this.scene.matter.add.rectangle(this.sprite.body.position.x-20, this.sprite.body.position.y-2, 1, 1, {
+                    isSensor:true,
+                    isStatic: false,
+                    ignoreGravity: true,
+                    label:'hitbox-attack'
+                })
+                hitbox2 = this.scene.matter.add.rectangle(this.sprite.body.position.x-18, this.sprite.body.position.y-2, 1, 1, {
+                    isSensor:true,
+                    isStatic: false,
+                    ignoreGravity: true,
+                    label:'hitbox-attack'
+                })
+                hitbox3 = this.scene.matter.add.rectangle(this.sprite.body.position.x-16, this.sprite.body.position.y-2, 1, 1, {
+                    isSensor:true,
+                    isStatic: false,
+                    ignoreGravity: true,
+                    label:'hitbox-attack'
+                })
+                hitbox4 = this.scene.matter.add.rectangle(this.sprite.body.position.x-14, this.sprite.body.position.y-2, 1, 1, {
+                    isSensor:true,
+                    isStatic: false,
+                    ignoreGravity: true,
+                    label:'hitbox-attack'
+                })
+            }
+            else{
+                this.hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x+20, this.sprite.body.position.y-2, 1, 1, {
+                    isSensor:true,
+                    isStatic: false,
+                    ignoreGravity: true,
+                    label:'hitbox-attack'
+                })
+                hitbox1 = this.scene.matter.add.rectangle(this.sprite.body.position.x+20, this.sprite.body.position.y-2, 1, 1, {
+                    isSensor:true,
+                    isStatic: false,
+                    ignoreGravity: true,
+                    label:'hitbox-attack'
+                })
+                hitbox2 = this.scene.matter.add.rectangle(this.sprite.body.position.x+18, this.sprite.body.position.y-2, 1, 1, {
+                    isSensor:true,
+                    isStatic: false,
+                    ignoreGravity: true,
+                    label:'hitbox-attack'
+                })
+                hitbox3 = this.scene.matter.add.rectangle(this.sprite.body.position.x+16, this.sprite.body.position.y-2, 1, 1, {
+                    isSensor:true,
+                    isStatic: false,
+                    ignoreGravity: true,
+                    label:'hitbox-attack'
+                })
+                hitbox4 = this.scene.matter.add.rectangle(this.sprite.body.position.x+14, this.sprite.body.position.y-2, 1, 1, {
+                    isSensor:true,
+                    isStatic: false,
+                    ignoreGravity: true,
+                    label:'hitbox-attack'
+                })
+            }
+            this.sprite.setStatic(true)
+            this.scene.time.delayedCall(100, () => {
+                this.sprite.setStatic(false)
+                this.scene.matter.world.remove(this.hitbox);
+            })
+            this.scene.time.delayedCall(300, () => {
+                this.canBlade = true
+                this.stateMachine.setState('idle')
+            })
+            this.scene.time.delayedCall(1000, () => {
+                this.canBlade = true
+            })
+        }  
+        else{
+            this.stateMachine.setState('idle')
+        } 
+        this.scene.time.delayedCall(1000, () => {
+            this.canBlade = true
+        })
+    }*/

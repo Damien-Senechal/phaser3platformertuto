@@ -32,7 +32,7 @@ export default class Level extends Phaser.Scene
         this.screenHeight = this.game.config.height
         this.screenWidth = this.game.config.width
 
-        //update world physics 30 times per second
+        //update world physics 60 times per second
         this.matter.world.update60Hz()
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
             this.destroy()
@@ -101,14 +101,13 @@ export default class Level extends Phaser.Scene
             {
                 case 'Elijah_spawn':
                 {   
-                    this.elijah = this.matter.add.sprite(x, y, 'Elijah', 0, {label: 'Elijah', isStatic:true})
-                        .setData('type', 'Elijah')
-                    this.elijah.setBody({
+                    this.elijah = this.matter.add.sprite(x, y, 'Elijah', 0, {label: 'Elijah'})
+                    /*this.elijah.setBody({
                             width:11,
                             height:13,
                         }, {
                             label: 'Elijah',
-                        })
+                        })*/
                     this.elijah.setFixedRotation()
                     this.elijah.setFriction(1)
                 
@@ -117,7 +116,7 @@ export default class Level extends Phaser.Scene
                     this.cameras.main.startFollow(this.elijah, false, 0.1, 0.1)
                     break
                 }
-                case 'Pig':
+                /*case 'Pig':
                 {
                     let pig = this.matter.add.sprite(x, y, 'Pig', 0)
                         .setFixedRotation()
@@ -138,7 +137,7 @@ export default class Level extends Phaser.Scene
                     })
                     this.ennemies.add('corner', corner)
                     break
-                }
+                }*/
                 case 'Checkpoint':
                 {
                     let checkpoint = this.matter.add.rectangle(x, y, 16, 1000, {

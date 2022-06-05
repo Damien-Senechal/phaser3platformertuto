@@ -197,7 +197,10 @@ export default class PigController
     private moveLeftOnUpdate(dt: number)
     {
         this.moveTime += dt
-        this.sprite.setVelocityX(this.speed)
+        if(this.alive)
+        {
+            this.sprite.setVelocityX(this.speed)
+        }
 
         if(this.moveTime > 2000)
         {
@@ -214,7 +217,11 @@ export default class PigController
     private moveRightOnUpdate(dt: number)
     {
         this.moveTime += dt
-        this.sprite.setVelocityX(-this.speed)
+        if(this.alive)
+        {
+            this.sprite.setVelocityX(-this.speed)
+        }
+        
 
         if(this.moveTime > 2000)
         {
@@ -260,14 +267,20 @@ export default class PigController
     {
         if(this.sprite.x < this.target.x)
         {
-            this.sprite.setVelocityX((this.speed)*-1)
+            if(this.alive)
+            {
+                this.sprite.setVelocityX((this.speed)*-1)
+            }
             this.scene.time.delayedCall(1000, () => {
                 this.stateMachine.setState('attack')
             })
         }
         else if(this.sprite.x > this.target.x)
         {
-            this.sprite.setVelocityX(this.speed)
+            if(this.alive)
+            {
+                this.sprite.setVelocityX(this.speed)
+            }       
             this.scene.time.delayedCall(1000, () => {
                 this.stateMachine.setState('attack')
             })
