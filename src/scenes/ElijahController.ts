@@ -36,10 +36,12 @@ export default class PlayerController
     private checkpoint
     private bullets = 5
     private trunk!: Phaser.GameObjects.Sprite
+    private pistolSprite!: Phaser.GameObjects.Sprite
     private angle
     private hitboxTouch
     private alive
     private isParry
+    private lastGround
 
     constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke, ennemies: EnnemiesController)
     {
@@ -78,6 +80,7 @@ export default class PlayerController
         this.hook = null
         this.rope = null
         this.bullet = null
+        this.lastGround = null
 
         const elijahController = {
             sprite,
@@ -253,7 +256,7 @@ export default class PlayerController
                         this.lastPig = b1.gameObject
                         //events.emit('pig-killed',this.lastPig)
                         this.hitboxTouch = true
-                        console.log(this.hitboxTouch)
+                        //console.log(this.hitboxTouch)
                         return
                     }
                     if(b1.label === 'hitbox-attack' && b2.label === 'pig-hitbox' && this.alive && !this.isParry)
@@ -261,7 +264,7 @@ export default class PlayerController
                         this.lastPig = b2.gameObject
                         //events.emit('pig-killed',this.lastPig)
                         this.hitboxTouch = true
-                        console.log(this.hitboxTouch)
+                        //console.log(this.hitboxTouch)
                         return
                     }
 
@@ -271,18 +274,30 @@ export default class PlayerController
 
                     if(b2.label === 'hitbox-shoot' && b1.label === 'pig-hitbox' && this.alive)
                     {
-                        this.scene.matter.world.remove(b2);
+                        b2.gameObject.destroy()
                         this.lastPig = b1.gameObject
                         events.emit('pig-killed',this.lastPig)
+                        return
+                    }
+                    else if(b2.label === 'hitbox-shoot' && b1.label === 'ground')
+                    {
+                        b2.gameObject.destroy()
                         return
                     }
                     if(b1.label === 'hitbox-shoot' && b2.label === 'pig-hitbox' && this.alive)
                     {
-                        this.scene.matter.world.remove(b2);
-                        this.lastPig = b1.gameObject
+                        b1.gameObject.destroy()
+                        this.lastPig = b2.gameObject
                         events.emit('pig-killed',this.lastPig)
                         return
                     }
+                    else if(b1.label === 'hitbox-shoot' && b2.label === 'ground')
+                    {
+                        b1.gameObject.destroy()
+                        return
+                    }
+                    
+                    
                     
                     // Elijah Collision *start*
 
@@ -312,6 +327,7 @@ export default class PlayerController
                     {
                         this.isGrounded = true
                         this.canFireHook = true
+                        this.lastGround = 0
                         console.log('on touche le sol')
                         return
                     }
@@ -343,7 +359,7 @@ export default class PlayerController
                         this.lastPig = b1.gameObject
                         //events.emit('pig-killed',this.lastPig)
                         this.hitboxTouch = false
-                        console.log(this.hitboxTouch)
+                        //console.log(this.hitboxTouch)
                         return
                     }
                     if(b1.label === 'hitbox-attack' && b2.label === 'pig-hitbox' && this.alive && !this.isParry)
@@ -351,13 +367,20 @@ export default class PlayerController
                         this.lastPig = b2.gameObject
                         //events.emit('pig-killed',this.lastPig)
                         this.hitboxTouch = false
-                        console.log(this.hitboxTouch)
+                        //console.log(this.hitboxTouch)
                         return
                     }
                     if(b2.label === 'hitbox-shoot' && b1.label === 'pig-hitbox' && this.alive)
                     {
-                        this.scene.matter.world.remove(b2);
+                        b2.gameObject.destroy()
                         this.lastPig = b1.gameObject
+                        events.emit('pig-killed',this.lastPig)
+                        return
+                    }
+                    if(b1.label === 'hitbox-shoot' && b2.label === 'pig-hitbox' && this.alive)
+                    {
+                        b1.gameObject.destroy()
+                        this.lastPig = b2.gameObject
                         events.emit('pig-killed',this.lastPig)
                         return
                     }
@@ -368,6 +391,7 @@ export default class PlayerController
                         console.log('on sort du sol')
                         return
                     }
+                    
                 }
             }, this);
 
@@ -447,7 +471,56 @@ export default class PlayerController
             events.emit('pig-killed',this.lastPig)
         }
 
-        console.log(this.isGrounded)
+        if(this.activeWeapon === 'Pistol')
+        {
+            if(!this.pistolSprite)
+            {
+                this.pistolSprite = this.scene.add.sprite(this.sprite.x, this.sprite.y, 'Elijah-pistol').setOrigin(0, 1)
+            }
+            this.pistolSprite.setVisible(true)
+            //console.log(this.pistolSprite.rotation)
+            if(!this.sprite.flipX)
+            {
+                this.pistolSprite.setOrigin(0, 1)
+                this.pistolSprite.rotation = Phaser.Math.Angle.Between(this.pistolSprite.x, this.pistolSprite.y, this.scene.game.input.mousePointer.worldX, this.scene.game.input.mousePointer.worldY)
+                if((this.pistolSprite.rotation < -1.57))
+                {
+                    this.pistolSprite.rotation = -1.57
+                }
+                else if(this.pistolSprite.rotation > 1.57)
+                {
+                    this.pistolSprite.rotation = 1.57
+                }
+                this.pistolSprite.flipX = false
+                this.pistolSprite.x = this.sprite.body.position.x+3
+                this.pistolSprite.y = this.sprite.body.position.y+2
+            }
+            else{
+                this.pistolSprite.setOrigin(1, 1)
+                this.pistolSprite.rotation = Phaser.Math.Angle.Between(this.pistolSprite.x, this.pistolSprite.y, this.scene.game.input.mousePointer.worldX, this.scene.game.input.mousePointer.worldY)+3.14
+                if((this.pistolSprite.rotation > 1.57))
+                {
+                    this.pistolSprite.rotation = 1.57
+                }
+                else if(this.pistolSprite.rotation < -1.57)
+                {
+                    this.pistolSprite.rotation = -1.57
+                }
+                this.pistolSprite.flipX = true
+                this.pistolSprite.x = this.sprite.body.position.x-3
+                this.pistolSprite.y = this.sprite.body.position.y+2
+            }
+            
+        }
+        else{
+            if(this.pistolSprite)
+            {
+                this.pistolSprite.setVisible(false)
+            }
+            
+        }
+
+        //console.log(this.lastGround)
         
     }
 
@@ -461,6 +534,10 @@ export default class PlayerController
         else if(this.activeWeapon === 'Blade')
         {
             this.sprite.play('idleBlade')
+        }
+        else if(this.activeWeapon === 'Pistol')
+        {
+            this.sprite.play('idlePistol')
         }
     }
 
@@ -498,6 +575,10 @@ export default class PlayerController
         else if(this.activeWeapon === 'Blade')
         {
             this.sprite.play('walkBlade')
+        }
+        else if(this.activeWeapon === 'Pistol')
+        {
+            this.sprite.play('walkPistol')
         }
 
         if(this.sprite.flipX)
@@ -576,6 +657,10 @@ export default class PlayerController
         {
             this.sprite.play('jumpUPBlade')
         }
+        else if(this.activeWeapon === 'Pistol')
+        {
+            this.sprite.play('jumpUPPistol')
+        }
         
         this.smoke.createEmitter({
             speed:25,
@@ -650,8 +735,20 @@ export default class PlayerController
             this.releaseHook()
         }
         this.scene.matter.world.on("collisionstart", (e, b1, b2)=>{
-            if((b1.label == 'HOOK') || (b2.label == 'HOOK') && !this.rope && this.hook && (b1.label !== 'Checkpoint' && b2.label !== 'Checkpoint'))
+            if((b1.label === 'HOOK') || (b2.label === 'HOOK') && !this.rope && this.hook && b1.label !== 'Checkpoint' && b2.label !== 'Checkpoint' && (b1.id === this.lastGround && b2.id === this.lastGround))
             {
+                this.releaseHook()
+            }
+            else if((b1.label === 'HOOK') || (b2.label === 'HOOK') && !this.rope && this.hook && b1.label !== 'Checkpoint' && b2.label !== 'Checkpoint' && (b1.id!== this.lastGround && b2.id !== this.lastGround))
+            {
+                if(b1.label === 'HOOK')
+                {
+                    this.lastGround = b2.id
+                }
+                else if(b2.label === 'HOOK')
+                {
+                    this.lastGround = b1.id
+                }
                 this.scene.matter.body.setStatic(this.hook, true)
                 
 
@@ -665,6 +762,7 @@ export default class PlayerController
                     this.canFireHook = true
                     this.releaseHook();
                 }
+                return
             }
         }, this)
 
@@ -699,6 +797,10 @@ export default class PlayerController
         else if(this.activeWeapon === 'Blade')
         {
             this.sprite.play('jumpDownBlade')
+        }
+        else if(this.activeWeapon === 'Pistol')
+        {
+            this.sprite.play('jumpDownPistol')
         }
     }
 
@@ -762,6 +864,18 @@ export default class PlayerController
 
     private pigOnEnter()
     {
+        if(this.activeWeapon === 'Hook')
+        {
+            this.sprite.play('damage')
+        }
+        else if(this.activeWeapon === 'Blade')
+        {
+            this.sprite.play('damageBlade')
+        }
+        else if(this.activeWeapon === 'Pistol')
+        {
+            this.sprite.play('damagePistol')
+        }
         if(this.lastPig)
         {
             if(this.sprite.x < this.lastPig.x)
@@ -808,10 +922,15 @@ export default class PlayerController
                 this.sprite.setTint(color)
             }
         })
-
-        this.stateMachine.setState('idle')
-
         this.setHealth(this.health - 10)
+        if(this.alive && this.health > 0){
+            this.scene.time.delayedCall(500, () => {
+                this.stateMachine.setState('idle')
+            })
+        }
+        else{
+            this.stateMachine.setState('dead')
+        }
     }
 
     private shootOnEnter()
@@ -824,7 +943,18 @@ export default class PlayerController
 
     private deadOnEnter()
     {
-        //this.sprite.play('player-death')
+        if(this.activeWeapon === 'Hook')
+        {
+            this.sprite.play('die')
+        }
+        else if(this.activeWeapon === 'Blade')
+        {
+            this.sprite.play('dieBlade')
+        }
+        else if(this.activeWeapon === 'Pistol')
+        {
+            this.sprite.play('diePistol')
+        }
         this.alive = false
 
         this.scene.time.delayedCall(1500, () => {
@@ -842,7 +972,7 @@ export default class PlayerController
     private deadOnExit()
     {
         this.hitboxTouch = false
-        console.log(this.hitboxTouch)
+        //console.log(this.hitboxTouch)
     }
 
     private parryOnEnter()
@@ -926,6 +1056,9 @@ export default class PlayerController
     }
 
     private createAnimations(){
+
+        //Hook Animations
+
         this.scene.anims.create({
             key: 'idle',
             frames: this.scene.anims.generateFrameNumbers('Elijah', { frames: [0, 1, 2, 3, 4 ] }),
@@ -956,7 +1089,20 @@ export default class PlayerController
             frameRate: 10,
             repeat: 0
         });
+        this.scene.anims.create({
+            key: 'damage',
+            frames: this.scene.anims.generateFrameNumbers('Elijah', { start:15, end:18 }),
+            frameRate: 10,
+            repeat: 0
+        });
+        this.scene.anims.create({
+            key: 'die',
+            frames: this.scene.anims.generateFrameNumbers('Elijah', { start:19, end:23 }),
+            frameRate: 10,
+            repeat: 0
+        });
 
+        //Grapple Animations
 
         this.scene.anims.create({
             key: 'idleGrapple',
@@ -988,6 +1134,8 @@ export default class PlayerController
             frameRate: 10,
             repeat: 0
         });
+
+        //Blade Animations
 
         this.scene.anims.create({
             key: 'idleBlade',
@@ -1022,6 +1170,63 @@ export default class PlayerController
         this.scene.anims.create({
             key: 'attackBlade',
             frames: this.scene.anims.generateFrameNumbers('ElijahBlade', { frames: [ 15, 16, 17, 18, 19 ] }),
+            frameRate: 10,
+            repeat: 0
+        });
+        this.scene.anims.create({
+            key: 'damageBlade',
+            frames: this.scene.anims.generateFrameNumbers('ElijahBlade', {start: 20, end: 23}),
+            frameRate: 10,
+            repeat: 0
+        });
+        this.scene.anims.create({
+            key: 'dieBlade',
+            frames: this.scene.anims.generateFrameNumbers('ElijahBlade', {start: 24, end: 28}),
+            frameRate: 10,
+            repeat: 0
+        });
+
+        //Pistol Animations
+
+        this.scene.anims.create({
+            key: 'idlePistol',
+            frames: this.scene.anims.generateFrameNumbers('ElijahPistol', { frames: [0, 1, 2, 3, 4 ] }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'walkPistol',
+            frames: this.scene.anims.generateFrameNumbers('ElijahPistol', { frames: [ 5, 6, 7, 8, 9, 10 ] }),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'jumpUPPistol',
+            frames: this.scene.anims.generateFrameNumbers('ElijahPistol', { frames: [ 11 ] }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'jumpDownPistol',
+            frames: this.scene.anims.generateFrameNumbers('ElijahPistol', { frames: [ 12 ] }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'jumpTouchPistol',
+            frames: this.scene.anims.generateFrameNumbers('ElijahPistol', { frames: [ 13, 14 ] }),
+            frameRate: 10,
+            repeat: 0
+        });
+        this.scene.anims.create({
+            key: 'damagePistol',
+            frames: this.scene.anims.generateFrameNumbers('ElijahPistol', {start: 15, end: 18}),
+            frameRate: 10,
+            repeat: 0
+        });
+        this.scene.anims.create({
+            key: 'diePistol',
+            frames: this.scene.anims.generateFrameNumbers('ElijahPistol', {start: 19, end: 23}),
             frameRate: 10,
             repeat: 0
         });
@@ -1060,13 +1265,15 @@ export default class PlayerController
             {
                 let angle = Phaser.Math.Angle.Between(this.sprite.x, this.sprite.y, e.worldX, e.worldY)
     
-                        this.bullet = this.scene.matter.add.rectangle(this.sprite.x+(16)*Math.cos(angle), this.sprite.y+(16)*Math.sin(angle), 5, 5, {
-                            ignoreGravity:true
+                        this.bullet = this.scene.matter.add.sprite(this.sprite.x+(16)*Math.cos(angle), this.sprite.y+(16)*Math.sin(angle), 'bullet', 0, {
+                            ignoreGravity:true,
+                            label: 'hitbox-shoot'
                         })
                         this.bullet.label = 'hitbox-shoot'
+                        this.bullet.rotation = angle
     
     
-                        this.scene.matter.body.setVelocity(this.bullet,{
+                        this.scene.matter.body.setVelocity(this.bullet.body,{
                             x: 10* Math.cos(angle),
                             y: 10* Math.sin(angle)
                         })
