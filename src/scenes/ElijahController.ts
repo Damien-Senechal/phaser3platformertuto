@@ -533,7 +533,7 @@ export default class PlayerController
     {
         const speed = 2.5
 
-        if(this.isGrounded === false //&& this.sprite.body.velocity.y > 0)
+        if(this.isGrounded === false)
         {
             this.stateMachine.setState('falling')
         }
