@@ -179,7 +179,7 @@ export default class Level2 extends Phaser.Scene
         this.scene.stop('interface')
         this.pigs.forEach(pig => pig.destroy())
     }
-d
+
     update(t: number, dt: number)
     {
         this.elijahController?.update(dt)
