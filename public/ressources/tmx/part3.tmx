@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.5" orientation="orthogonal" renderorder="right-down" width="75" height="25" tilewidth="16" tileheight="16" infinite="1" nextlayerid="8" nextobjectid="207">
+<map version="1.8" tiledversion="1.8.2" orientation="orthogonal" renderorder="right-down" width="75" height="25" tilewidth="16" tileheight="16" infinite="1" nextlayerid="8" nextobjectid="219">
  <editorsettings>
   <export target="../json/part3.json" format="json"/>
  </editorsettings>
@@ -2573,8 +2573,10 @@
  <layer id="4" name="decors" width="75" height="25">
   <data encoding="csv"/>
  </layer>
- <objectgroup id="5" name="objects" visible="0">
-  <object id="77" name="Elijah_spawn" x="32" y="160" width="16" height="16"/>
+ <objectgroup id="5" name="objects">
+  <object id="77" name="Elijah_spawn" x="3360" y="160" width="16" height="16"/>
+  <object id="214" name="End" x="5872" y="-32" width="16" height="32"/>
+  <object id="215" name="Dead" x="3408" y="304" width="2048" height="208"/>
  </objectgroup>
  <objectgroup id="3" name="collisions">
   <object id="133" name="Ground" x="320" y="160" width="592" height="352"/>

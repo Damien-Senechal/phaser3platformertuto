@@ -344,7 +344,21 @@ export default class PlayerController
                     if(b1.label === 'Elijah' && b2.label === 'End' && this.alive)
                     {
                         //console.log(bodyB.label)
-                        this.scene.scene.start('fort')
+                        if(this.scene.scene.key === 'fort')
+                        {
+                            this.scene.scene.start('game-over')
+                        }
+                        else{
+                            this.scene.scene.start('fort')
+                        }
+                        
+                        return
+                    }
+                    if(b1.label === 'Elijah' && b2.label === 'Dead' && this.alive)
+                    {
+                        //console.log(bodyB.label)
+                        this.scene.scene.start('game-over')
+                        
                         return
                     }
 

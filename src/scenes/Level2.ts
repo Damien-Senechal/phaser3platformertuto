@@ -160,6 +160,16 @@ export default class Level2 extends Phaser.Scene
                     })
                     break
                 }
+                case 'Dead':
+                {
+                    let dead = this.matter.add.rectangle(x+width/2, y+height/2, width, height, {
+                        isStatic: true,
+                        isSensor: true,
+                        ignoreGravity: true,
+                        label: 'Dead'
+                    })
+                    break
+                }
             }
         })
     }
