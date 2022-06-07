@@ -22,7 +22,7 @@ export default class ElijahController
     private hook
     private rope
     private graphics
-    private smokeq
+    private smoke
     private isGrounded
     private refY
     private canFireHook

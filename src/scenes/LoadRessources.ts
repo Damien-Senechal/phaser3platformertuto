@@ -26,6 +26,9 @@ export default class LoadRessources
         scene.load.image('ammo', 'ressources/sprite/ammo.png')
         scene.load.image('medkit', 'ressources/sprite/medkit.png')
         scene.load.spritesheet('spark', 'ressources/sprite/spark-sheet.png', { frameWidth: 2, frameHeight: 2 });
+        //scene.load.spritesheet('blood', 'ressources/sprite/blood.png', { frameWidth: 6, frameHeight: 2 });
+        scene.load.image('blood', 'ressources/sprite/blood.png')
+
 
         scene.load.audio('jump', 'ressources/audio/Jump.wav')
         scene.load.audio('pistol', 'ressources/audio/Pistol.wav')

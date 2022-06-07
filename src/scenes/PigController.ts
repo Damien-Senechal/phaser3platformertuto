@@ -276,6 +276,19 @@ export default class PigController
     private deadOnEnter()
     {
         let corpse = this.scene.add.sprite(this.sprite.x, this.sprite.y, 'Pig')
+        for (let i = 0; i < 50; i++) {
+        let particle = this.scene.matter.add.image(Phaser.Math.Between(corpse.x-10, corpse.x+10), Phaser.Math.Between(corpse.y-10, corpse.y+10), 'blood', 0);
+        //particle.setBlendMode('ADD');
+        particle.setScale(1)
+        particle.setFriction(0.005);
+        particle.setBounce(1);
+        particle.setMass(1);
+        particle.setVelocityY(Phaser.Math.Between(-3, 3))
+        particle.setVelocityX(Phaser.Math.Between(-3, 3))
+        this.scene.time.delayedCall(1000, () => {
+            particle.destroy()
+        })
+        }
         corpse.play('diePig')
         this.sprite.destroy()
         events.emit('reset')
