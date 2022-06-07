@@ -8,7 +8,7 @@ import main from '~/main'
 
 type CursorKeys = Phaser.Types.Input.Keyboard.CursorKeys
 
-export default class PlayerController
+export default class ElijahController
 {
     private scene: Phaser.Scene
     private sprite: Phaser.Physics.Matter.Sprite
@@ -22,7 +22,7 @@ export default class PlayerController
     private hook
     private rope
     private graphics
-    private smoke
+    private smokeq
     private isGrounded
     private refY
     private canFireHook
@@ -362,6 +362,10 @@ export default class PlayerController
                         if(this.scene.scene.key === 'fort')
                         {
                             this.scene.scene.start('game-over')
+                        }
+                        else if(this.scene.scene.key === 'level')
+                        {
+                            this.scene.scene.start('city')
                         }
                         else{
                             this.scene.scene.start('fort')

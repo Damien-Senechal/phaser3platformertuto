@@ -151,6 +151,17 @@
                  "width":16,
                  "x":1744,
                  "y":560
+                }, 
+                {
+                 "height":0,
+                 "id":99,
+                 "name":"Pig",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":1038,
+                 "y":404
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -457,7 +468,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":99,
+ "nextobjectid":101,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

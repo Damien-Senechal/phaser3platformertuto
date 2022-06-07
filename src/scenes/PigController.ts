@@ -111,7 +111,7 @@ export default class PigController
         this.scene.matter.world.on('collisionstart', (event, b1, b2) => {
             for (var i = 0; i < event.pairs.length; i++) {
     
-                if(b2.label === 'corner' && b1.label === 'pig')
+                if(b2.label === 'corner' && b1.label === 'pig' && this.alive)
                 {
                     if(this.stateMachine.isCurrentState('move-left'))
                     {   
@@ -199,65 +199,82 @@ export default class PigController
 
     private idleOnEnter()
     {
-        this.sprite.play('idlePig')
-        const r = Phaser.Math.Between(1, 100)
-        if(r < 50)
+        if(this.alive)
         {
-            this.stateMachine.setState('move-left')
-        }   
-        else
-        {
-            this.stateMachine.setState('move-right')
+            this.sprite.play('idlePig')
+            const r = Phaser.Math.Between(1, 100)
+            if(r < 50)
+            {
+                this.stateMachine.setState('move-left')
+            }   
+            else
+            {
+                this.stateMachine.setState('move-right')
+            }
         }
     }
 
     private moveLeftOnEnter()
     {
-        this.sprite.play('walkPig')
-        this.sprite.flipX =false
-        this.moveTime = 0
-        //dthis.sprite.play('move-left')
+        if(this.alive)
+        {
+            this.sprite.play('walkPig')
+            this.sprite.flipX =false
+            this.moveTime = 0
+            //dthis.sprite.play('move-left')
+        }
     }
 
     private moveLeftOnUpdate(dt: number)
     {
-        this.moveTime += dt
         if(this.alive)
         {
-            this.sprite.setVelocityX(this.speed)
-        }
+            this.moveTime += dt
+            if(this.alive)
+            {
+                this.sprite.setVelocityX(this.speed)
+            }
 
-        if(this.moveTime > 2000)
-        {
-            this.stateMachine.setState('move-right')
+            if(this.moveTime > 2000)
+            {
+                this.stateMachine.setState('move-right')
+            }
         }
+        
     }
 
     private moveRightOnEnter()
     {
-        this.sprite.flipX = true
-        this.moveTime = 0
-        this.sprite.play('walkPig')
+        if(this.alive)
+        {
+            this.sprite.flipX = true
+            this.moveTime = 0
+            this.sprite.play('walkPig')
+        }
+        
     }
 
     private moveRightOnUpdate(dt: number)
     {
-        this.moveTime += dt
         if(this.alive)
         {
-            this.sprite.setVelocityX(-this.speed)
-        }
+            this.moveTime += dt
+            if(this.alive)
+            {
+                this.sprite.setVelocityX(-this.speed)
+            }
         
 
-        if(this.moveTime > 2000)
-        {
-            this.stateMachine.setState('move-left')
+            if(this.moveTime > 2000)
+            {
+                this.stateMachine.setState('move-left')
+            }
         }
+        
     }
 
     private deadOnEnter()
     {
-        this.sprite.play('diePig')
         let corpse = this.scene.add.sprite(this.sprite.x, this.sprite.y, 'Pig')
         corpse.play('diePig')
         this.sprite.destroy()
@@ -284,44 +301,48 @@ export default class PigController
             {
                 this.sprite.setVelocityX(0)
             }
-        }
 
-        this.scene.time.delayedCall(3000, () => {
-            if(this.alive)
-            {
-                this.stateMachine.setState('idle')
-            }
-        })
+            this.scene.time.delayedCall(3000, () => {
+                if(this.alive)
+                {
+                    this.stateMachine.setState('idle')
+                }
+            })
+        }
         
     }
 
     private backOnUpdate()
     {
-        if(this.sprite.x < this.target.x)
+        if(this.alive)
         {
-            if(this.alive)
+            if(this.sprite.x < this.target.x)
             {
-                this.sprite.flipX = false
-                this.sprite.setVelocityX((this.speed)*-1)
+                if(this.alive)
+                {
+                    this.sprite.flipX = false
+                    this.sprite.setVelocityX((this.speed)*-1)
+                }
+                this.scene.time.delayedCall(1000, () => {
+                    this.stateMachine.setState('attack')
+                })
             }
-            this.scene.time.delayedCall(1000, () => {
-                this.stateMachine.setState('attack')
-            })
-        }
-        else if(this.sprite.x > this.target.x)
-        {
-            if(this.alive)
+            else if(this.sprite.x > this.target.x)
             {
-                this.sprite.flipX = true
-                this.sprite.setVelocityX(this.speed)
-            }       
-            this.scene.time.delayedCall(1000, () => {
-                this.stateMachine.setState('attack')
-            })
+                if(this.alive)
+                {
+                    this.sprite.flipX = true
+                    this.sprite.setVelocityX(this.speed)
+                }       
+                this.scene.time.delayedCall(1000, () => {
+                    this.stateMachine.setState('attack')
+                })
+            }
+            else{
+                this.stateMachine.setState('idle')
+            } 
         }
-        else{
-            this.stateMachine.setState('idle')
-        } 
+        
     }
 
     private handleAttack(pig: Phaser.Physics.Matter.Sprite)

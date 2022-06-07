@@ -2574,7 +2574,7 @@
   <data encoding="csv"/>
  </layer>
  <objectgroup id="5" name="objects">
-  <object id="77" name="Elijah_spawn" x="3360" y="160" width="16" height="16"/>
+  <object id="77" name="Elijah_spawn" x="48" y="176" width="16" height="16"/>
   <object id="214" name="End" x="5872" y="-32" width="16" height="32"/>
   <object id="215" name="Dead" x="3408" y="304" width="2048" height="208"/>
  </objectgroup>

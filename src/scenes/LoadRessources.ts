@@ -8,6 +8,7 @@ export default class LoadRessources
         scene.load.image('tiles2', 'ressources/tileset/Town_Tileset.png')
         scene.load.tilemapTiledJSON('tilemap', 'ressources/json/part1.json')
         scene.load.tilemapTiledJSON('tilemap2', 'ressources/json/part3.json')
+        scene.load.tilemapTiledJSON('tilemap3', 'ressources/json/part2.json')
         scene.load.spritesheet('Elijah', 'ressources/sprite/Elijah_idle-Sheet.png', { frameWidth: 32, frameHeight: 38 });
         scene.load.spritesheet('Pig', 'ressources/sprite/pig_idle-Sheet.png', { frameWidth: 32, frameHeight: 32 });
         scene.load.spritesheet('ElijahGrapple', 'ressources/sprite/Elijah_hook-Sheet.png', { frameWidth: 32, frameHeight: 32 });
