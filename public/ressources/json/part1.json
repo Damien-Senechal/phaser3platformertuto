@@ -129,6 +129,28 @@
                  "width":16,
                  "x":1840,
                  "y":400
+                }, 
+                {
+                 "height":16,
+                 "id":97,
+                 "name":"medkit",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1088,
+                 "y":448
+                }, 
+                {
+                 "height":16,
+                 "id":98,
+                 "name":"ammo",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1744,
+                 "y":560
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -435,7 +457,7 @@
          "y":0
         }],
  "nextlayerid":7,
- "nextobjectid":96,
+ "nextobjectid":99,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.8.2",

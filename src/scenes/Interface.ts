@@ -9,7 +9,7 @@ export default class UI extends Phaser.Scene
     private weaponText
     private weaponIcon
 
-    private bulletsSprite?: Phaser.GameObjects.Sprite[] = []
+    private bulletsSprite : Phaser.GameObjects.Sprite[] = []
 
     private health = 100
     private stamina = 100
@@ -46,7 +46,7 @@ export default class UI extends Phaser.Scene
         });
 
         this.graphics = this.add.graphics()
-        this.setInterface(this.health, this.stamina, this.bullet)
+        
         this.elijahPortrait = this.add.sprite(26, 25, 'Elijah-Portrait').play('idle-portrait')
 
         events.on('weapon-changed', this.changeWeapon, this)
@@ -57,9 +57,10 @@ export default class UI extends Phaser.Scene
             color: '#000000'
         })*/
         this.weaponIcon = this.add.image(600, 20, 'blade-icon')
-        for (let i = 1; i < this.bullet; i++) {
+        for (let i = 0; i < this.bullet; i++) {
             this.bulletsSprite.push(this.add.sprite(54+i*10, 36, 'bullet-icon').setScale(2))
         }
+        this.setInterface(this.health, this.stamina, this.bullet)
     }
 
     update() 
@@ -101,9 +102,11 @@ export default class UI extends Phaser.Scene
             this.graphics.fillRoundedRect(50, 21, width*percent2, 7, 5)
         }
 
-        if(bullets > this.bulletsSprite.length)
+        if(bullets > this.bulletsSprite.length+1)
         {
-            this.bulletsSprite.push(this.add.sprite(54+this.bulletsSprite.length*10, 36, 'bullet-icon').setScale(2))
+            for (let i = this.bulletsSprite.length; i < this.bullet; i++) {
+                this.bulletsSprite.push(this.add.sprite(54+i*10, 36, 'bullet-icon').setScale(2))
+            }
         }
         else if(bullets < this.bulletsSprite.length)
         {

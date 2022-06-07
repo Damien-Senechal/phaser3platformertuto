@@ -25,7 +25,7 @@ export default class PigController
         this.target = target
         this.id = id
 
-        //this.createAnimations()
+        this.createAnimations()
 
         const pigController = {
             sprite,
@@ -171,12 +171,35 @@ export default class PigController
 
     private createAnimations()
     {
-
+        this.scene.anims.create({
+            key: 'idlePig',
+            frames: this.scene.anims.generateFrameNumbers('Pig', { start:0, end: 4 }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'walkPig',
+            frames: this.scene.anims.generateFrameNumbers('Pig', { start:5, end: 10 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'jumpDown',
+            frames: this.scene.anims.generateFrameNumbers('Pig', { frames : [11] }),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.scene.anims.create({
+            key: 'diePig',
+            frames: this.scene.anims.generateFrameNumbers('Pig', { start:12, end: 16 }),
+            frameRate: 10,
+            repeat: 0
+        });
     }
 
     private idleOnEnter()
     {
-        //this.sprite.play('idle')
+        this.sprite.play('idlePig')
         const r = Phaser.Math.Between(1, 100)
         if(r < 50)
         {
@@ -190,6 +213,8 @@ export default class PigController
 
     private moveLeftOnEnter()
     {
+        this.sprite.play('walkPig')
+        this.sprite.flipX =false
         this.moveTime = 0
         //dthis.sprite.play('move-left')
     }
@@ -210,8 +235,9 @@ export default class PigController
 
     private moveRightOnEnter()
     {
+        this.sprite.flipX = true
         this.moveTime = 0
-        //this.sprite.play('move-right')
+        this.sprite.play('walkPig')
     }
 
     private moveRightOnUpdate(dt: number)
@@ -231,8 +257,12 @@ export default class PigController
 
     private deadOnEnter()
     {
+        this.sprite.play('diePig')
+        let corpse = this.scene.add.sprite(this.sprite.x, this.sprite.y, 'Pig')
+        corpse.play('diePig')
         this.sprite.destroy()
         events.emit('reset')
+        
     }
 
 
@@ -242,10 +272,12 @@ export default class PigController
         {
             if(this.sprite.x < this.target.x)
             {
+                this.sprite.flipX = false
                 this.sprite.setVelocityX(this.speed+1)
             }
             else if(this.sprite.x > this.target.x)
             {
+                this.sprite.flipX = true
                 this.sprite.setVelocityX((this.speed+1)*-1)
             }
             else
@@ -269,6 +301,7 @@ export default class PigController
         {
             if(this.alive)
             {
+                this.sprite.flipX = false
                 this.sprite.setVelocityX((this.speed)*-1)
             }
             this.scene.time.delayedCall(1000, () => {
@@ -279,6 +312,7 @@ export default class PigController
         {
             if(this.alive)
             {
+                this.sprite.flipX = true
                 this.sprite.setVelocityX(this.speed)
             }       
             this.scene.time.delayedCall(1000, () => {

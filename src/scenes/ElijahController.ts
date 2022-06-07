@@ -4,6 +4,7 @@ import StateMachine from '~/statemachine/StateMachine'
 import EnnemiesController from './EnnemiesController'
 import { sharedInstance as events} from './EventCenter'
 import * as MatterJS from 'matter-js'
+import main from '~/main'
 
 type CursorKeys = Phaser.Types.Input.Keyboard.CursorKeys
 
@@ -42,6 +43,13 @@ export default class PlayerController
     private alive
     private isParry
     private lastGround
+    private spark
+
+    private pistolSound
+    private jumpSound
+    private tongueEnterSound
+    private tongueTouchSound
+    private tongueExitSound
 
     constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke, ennemies: EnnemiesController)
     {
@@ -65,6 +73,7 @@ export default class PlayerController
         this.hitboxTouch = false
         this.alive = true
         this.isParry = false
+        this.spark = this.scene.add.particles('spark')
         
         /*this.hitbox = this.scene.matter.add.rectangle(this.sprite.body.position.x+20, this.sprite.body.position.y-2, 2, 2, {
             isSensor:true,
@@ -72,6 +81,12 @@ export default class PlayerController
             ignoreGravity: true,
             label:'hitbox-attack'
         })*/
+
+        this.pistolSound = this.scene.sound.add('pistol')
+        this.jumpSound = this.scene.sound.add('jump')
+        this.tongueEnterSound = this.scene.sound.add('tongue_enter')
+        this.tongueTouchSound = this.scene.sound.add('tongue_touch')
+        this.tongueExitSound = this.scene.sound.add('tongue_exit')
         
 
         this.inputManager()
@@ -359,6 +374,22 @@ export default class PlayerController
                         //console.log(bodyB.label)
                         this.scene.scene.start('game-over')
                         
+                        return
+                    }
+
+                    if(b1.label === 'Elijah' && b2.label === 'medkit' && this.alive)
+                    {
+                        //console.log(bodyB.label)
+                        this.setHealth(this.health + 50)
+                        b2.gameObject.destroy()
+                        
+                        return
+                    }
+                    if(b1.label === 'Elijah' && b2.label === 'ammo' && this.alive)
+                    {
+                        //console.log(bodyB.label)
+                        this.setBullets(this.bullets + 3)
+                        b2.gameObject.destroy()
                         return
                     }
 
@@ -662,6 +693,7 @@ export default class PlayerController
 
     private jumpOnEnter()
     {
+        this.jumpSound.play()
         this.isGrounded = false
         if(this.activeWeapon === 'Hook')
         {
@@ -724,6 +756,7 @@ export default class PlayerController
 
     private grappleOnEnter()
     {
+        this.tongueEnterSound.play()
         this.isGrounded = false
         this.sprite.play('jumpUPGrapple')
         this.trunk = this.scene.add.sprite(this.sprite.x, this.sprite.y, 'Elijah-trunk')
@@ -770,6 +803,7 @@ export default class PlayerController
                 //console.log(distance)
                 if(distance > 16*2 && distance < 200)
                 {
+                    this.tongueTouchSound.play()
                     this.rope = this.scene.matter.add.constraint(this.sprite.body as MatterJS.BodyType, this.hook, distance, 0)
                 }
                 else{
@@ -949,6 +983,33 @@ export default class PlayerController
 
     private shootOnEnter()
     {
+        this.pistolSound.play()
+        this.spark.createEmitter({
+            frame: [1, 2],
+            speed:500,
+            //gravityX:200,
+            gravityY:400,
+            lifespan:100,
+            scale:{start:.5, end:0.1},
+            x:this.bullet.x, 
+            y:this.bullet.y-3,
+            maxParticles: 5,
+            bounce: 0.9,
+            //bounds: { x: this.sprite.x, y: 0},
+            angle: {min:-90, max:90},
+            //deathZone: {type: 'onEnter', source: this.ground}
+            BlendModes: 'SCREEN'
+        })
+        var particle = this.scene.matter.add.image(this.pistolSprite.x, this.pistolSprite.y, 'shell', 0);
+        //particle.setBlendMode('ADD');
+        particle.setScale(2)
+        particle.setFriction(0.005);
+        particle.setBounce(1);
+        particle.setMass(1);
+        particle.setVelocityY(-3)
+        this.scene.time.delayedCall(5000, () => {
+            particle.destroy()
+        })
         this.bullets -= 1
         this.setBullets(this.bullets)
         //console.log(this.bullets)
@@ -1054,7 +1115,8 @@ export default class PlayerController
     {
         //is there a constraint? remove it
         if(this.rope)
-        {
+        {   
+            this.tongueExitSound.play()
             this.canFireHook = true
             this.scene.matter.world.removeConstraint(this.rope)
             this.rope = null
