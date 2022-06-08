@@ -26,7 +26,7 @@ export default class LoadRessources
         scene.load.image('shell', 'ressources/sprite/shell.png')
         scene.load.image('ammo', 'ressources/sprite/ammo.png')
         scene.load.image('medkit', 'ressources/sprite/medkit.png')
-        scene.load.spritesheet('spark', 'ressources/sprite/spark-sheet.png', { frameWidth: 2, frameHeight: 2 });
+        scene.load.image('spark', 'ressources/sprite/spark.png')
         //scene.load.spritesheet('blood', 'ressources/sprite/blood.png', { frameWidth: 6, frameHeight: 2 });
         scene.load.image('blood', 'ressources/sprite/blood.png')
         scene.load.image('paralax1', 'ressources/sprite/paralax1.png')

@@ -433,7 +433,7 @@ export default class ElijahController
                     if(b1.label === 'Elijah' && b2.label === 'Dead' && this.alive)
                     {
                         //console.log(bodyB.label)
-                        this.scene.scene.start('game-over')
+                        this.stateMachine.setState('dead')
                         
                         return
                     }
@@ -1071,7 +1071,6 @@ export default class ElijahController
     {
         this.pistolSound.play()
         this.spark.createEmitter({
-            frame: [1, 2],
             speed:500,
             //gravityX:200,
             gravityY:400,
