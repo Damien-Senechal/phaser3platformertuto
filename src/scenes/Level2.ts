@@ -32,7 +32,7 @@ export default class Level2 extends Phaser.Scene
         this.screenWidth = this.game.config.width
 
         //update world physics 30 times per second
-        this.matter.world.update60Hz()
+        this.matter.world.update30Hz()
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
             this.destroy()
         })

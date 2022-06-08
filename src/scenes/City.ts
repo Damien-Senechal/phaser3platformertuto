@@ -33,7 +33,7 @@ export default class Level extends Phaser.Scene
         this.screenWidth = this.game.config.width
 
         //update world physics 60 times per second
-        this.matter.world.update60Hz()
+        this.matter.world.update30Hz()
         this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
             this.destroy()
         })
@@ -57,6 +57,7 @@ export default class Level extends Phaser.Scene
 
         const map = this.make.tilemap( {key: 'tilemap3' } )
         const tileset = map.addTilesetImage('Town_Tileset', 'tiles2')
+        const tileset2 = map.addTilesetImage('bg-tileset', 'tiles3')
 
         const ground = map.createLayer('ground', tileset)
         ground.setDepth(0)
@@ -64,6 +65,16 @@ export default class Level extends Phaser.Scene
         decors1.setDepth(1)
         const decors2 = map.createLayer('decors2', tileset)
         decors2.setDepth(2)
+        const para1 = map.createLayer('paralax1', tileset2)
+        para1.setDepth(-1)
+        const para2 = map.createLayer('paralax2', tileset2)
+        para2.setDepth(-2)
+        const para3 = map.createLayer('paralax3', tileset2)
+        para3.setDepth(-3)
+        const para4 = map.createLayer('paralax4', tileset2)
+        para4.setDepth(-4)
+        const para5 = map.createLayer('paralax5', tileset2)
+        para5.setDepth(-5)
         //ground.setCollisionByProperty({ collides: true })
 
         //map.createLayer('obstacles', tileset)
@@ -174,6 +185,12 @@ export default class Level extends Phaser.Scene
                 }
             }
         })
+        let acceleration =.5
+        para1.scrollFactorX=acceleration
+        para2.scrollFactorX=acceleration*.5
+        para3.scrollFactorX=acceleration*.6
+        para4.scrollFactorX=acceleration
+        para5.scrollFactorX=acceleration
     }
 
     destroy()

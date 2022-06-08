@@ -6,6 +6,7 @@ export default class LoadRessources
         scene.load.image('smoke', 'ressources/sprite/smoke.png')
         scene.load.image('tiles', 'ressources/tileset/tile_desert3.png')
         scene.load.image('tiles2', 'ressources/tileset/Town_Tileset.png')
+        scene.load.image('tiles3', 'ressources/sprite/bg-tileset.png')
         scene.load.tilemapTiledJSON('tilemap', 'ressources/json/part1.json')
         scene.load.tilemapTiledJSON('tilemap2', 'ressources/json/part3.json')
         scene.load.tilemapTiledJSON('tilemap3', 'ressources/json/part2.json')
@@ -28,6 +29,12 @@ export default class LoadRessources
         scene.load.spritesheet('spark', 'ressources/sprite/spark-sheet.png', { frameWidth: 2, frameHeight: 2 });
         //scene.load.spritesheet('blood', 'ressources/sprite/blood.png', { frameWidth: 6, frameHeight: 2 });
         scene.load.image('blood', 'ressources/sprite/blood.png')
+        scene.load.image('paralax1', 'ressources/sprite/paralax1.png')
+        scene.load.image('paralax2', 'ressources/sprite/paralax2.png')
+        scene.load.image('paralax3', 'ressources/sprite/paralax3.png')
+        scene.load.image('paralax4', 'ressources/sprite/paralax4.png')
+        scene.load.image('paralax5', 'ressources/sprite/paralax5.png')
+        
 
 
         scene.load.audio('jump', 'ressources/audio/Jump.wav')

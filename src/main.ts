@@ -19,7 +19,7 @@ const config: Phaser.Types.Core.GameConfig = {
 	backgroundColor: '#ffe0bb',
 	fps: {
 		target: 60,
-		forceSetTimeOut: true
+		forceSetTimeOut: true,
 	},
 	physics: {
 		default: 'matter',

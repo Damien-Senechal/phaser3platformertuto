@@ -10,6 +10,8 @@ export default class Menu extends Phaser.Scene
     preload()
     {
         this.load.image('menu', 'ressources/sprite/menu.png')
+        this.load.image('play', 'ressources/sprite/play.png')
+        this.load.image('bg', 'ressources/sprite/bg.png')
     }
 
     create()
@@ -23,13 +25,13 @@ export default class Menu extends Phaser.Scene
         })
         .setOrigin(0.5)*/
 
+        this.add.image(0, 0, 'bg').setOrigin(0, 0).setScale(2)
         this.add.image(0, 0, 'menu').setOrigin(0, 0)
-
-        /*const button = this.add.rectangle(width*0.5, height*0.55, 150, 75, 0xffffff)
+        this.add.image(500, 125 , 'play').setOrigin(0, 0)
         .setInteractive()
         .on(Phaser.Input.Events.GAMEOBJECT_POINTER_UP, () => {
             this.scene.start('level')
-        })*/
+        })
 
         /*this.add.text(button.x, button.y, 'JOUER', {
             color: '#000000'
