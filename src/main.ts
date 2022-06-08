@@ -1,4 +1,4 @@
-import Phaser from 'phaser'
+import Phaser, { Game } from 'phaser'
 
 import GameOver from './scenes/GameOver'
 import TestRoom from './scenes/TestRoom'

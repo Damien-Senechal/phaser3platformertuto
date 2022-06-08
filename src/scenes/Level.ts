@@ -187,9 +187,9 @@ export default class Level extends Phaser.Scene
         })
         let acceleration =.5
         para1.scrollFactorX=acceleration
-        para2.scrollFactorX=acceleration*.5
+        para2.scrollFactorX=acceleration*.7
         para3.scrollFactorX=acceleration*.6
-        para4.scrollFactorX=acceleration*.7
+        para4.scrollFactorX=acceleration*.5
         para5.scrollFactorX=acceleration
 
     }

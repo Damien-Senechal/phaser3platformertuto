@@ -29,9 +29,13 @@ export default class PigController
         this.target = target
         this.id = id
 
-        this.idleSound = this.scene.sound.add('PigIdle')
+        this.idleSound = this.scene.sound.add('PigIdle', {
+            volume:.25
+        })
         this.idleSound.loop = true
-        this.dieSound = this.scene.sound.add('PigDie')
+        this.dieSound = this.scene.sound.add('PigDie', {
+            volume: .5
+        })
         this.gruntSound = this.scene.sound.add('grunt')
 
         this.createAnimations()
@@ -84,6 +88,7 @@ export default class PigController
             onUpdate: this.attackOnUpdate
         })
         .addState('back', {
+            onEnter: this.backOnEnter,
             onUpdate: this.backOnUpdate
         })
         .setState('idle')
@@ -204,6 +209,12 @@ export default class PigController
         this.scene.anims.create({
             key: 'diePig',
             frames: this.scene.anims.generateFrameNumbers('Pig', { start:12, end: 16 }),
+            frameRate: 10,
+            repeat: 0
+        });
+        this.scene.anims.create({
+            key: 'attackPig',
+            frames: this.scene.anims.generateFrameNumbers('Pig', { start:17, end: 21 }),
             frameRate: 10,
             repeat: 0
         });
@@ -355,6 +366,22 @@ export default class PigController
         
     }
 
+    private backOnEnter()
+    {
+        if(this.alive)
+        {
+            this.sprite.play('attackPig')
+            this.scene.time.delayedCall(1000, ()=>{
+                if(this.alive)
+                {
+                    this.sprite.play('walkPig')
+                }
+            
+        })
+        }
+        
+    }
+
     private backOnUpdate()
     {
         if(this.alive)
@@ -367,7 +394,11 @@ export default class PigController
                     this.sprite.setVelocityX((this.speed)*-1)
                 }
                 this.scene.time.delayedCall(1000, () => {
-                    this.stateMachine.setState('attack')
+                    if(this.alive)
+                    {
+                        this.stateMachine.setState('attack')
+                    }
+                    
                 })
             }
             else if(this.sprite.x > this.target.x)
@@ -378,7 +409,11 @@ export default class PigController
                     this.sprite.setVelocityX(this.speed)
                 }       
                 this.scene.time.delayedCall(1000, () => {
-                    this.stateMachine.setState('attack')
+                    if(this.alive)
+                    {
+                        this.stateMachine.setState('attack')
+                    }
+                    
                 })
             }
             else{

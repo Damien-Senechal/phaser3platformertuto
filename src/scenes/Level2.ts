@@ -170,6 +170,20 @@ export default class Level2 extends Phaser.Scene
                     })
                     break
                 }
+                case 'medkit':
+                {
+                    let medkit = this.matter.add.sprite(x, y, 'medkit', 0, {
+                        label: 'medkit'
+                    })
+                    break
+                }
+                case 'ammo':
+                {
+                    let medkit = this.matter.add.sprite(x, y, 'ammo', 0, {
+                        label: 'ammo'
+                    })
+                    break
+                }
             }
         })
     }

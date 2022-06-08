@@ -56,6 +56,10 @@ export default class ElijahController
     private swordSound
     private weaponSound
 
+    private music1
+    private music2
+    private music3
+
     constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke, ennemies: EnnemiesController)
     {
         this.scene = scene
@@ -99,6 +103,32 @@ export default class ElijahController
         this.pickupSound = this.scene.sound.add('Pickup')
         this.swordSound = this.scene.sound.add('sword')
         this.weaponSound = this.scene.sound.add('weapon')
+
+        this.music1 = this.scene.sound.add('music1', {
+            loop:true,
+            volume:.5
+        })
+        this.music2 = this.scene.sound.add('music2', {
+            loop:true,
+            volume:.5
+        })
+        this.music3 = this.scene.sound.add('music3', {
+            loop:true,
+            volume:.5
+        })
+
+        if(this.scene.scene.key === 'level')
+        {
+            this.music3.play()
+        }
+        else if(this.scene.scene.key === 'city')
+        {
+            this.music1.play()
+        }
+        else if(this.scene.scene.key === 'fort')
+        {
+            this.music2.play()
+        }
         
 
         this.inputManager()
@@ -381,16 +411,20 @@ export default class ElijahController
                     }
                     if(b1.label === 'Elijah' && b2.label === 'End' && this.alive)
                     {
+                        this.stateMachine.setState('falling')
                         //console.log(bodyB.label)
                         if(this.scene.scene.key === 'fort')
                         {
+                            this.music2.stop()
                             this.scene.scene.start('game-over')
                         }
                         else if(this.scene.scene.key === 'level')
-                        {
+                        {   
+                            this.music3.stop()
                             this.scene.scene.start('city')
                         }
                         else{
+                            this.music1.stop()
                             this.scene.scene.start('fort')
                         }
                         
@@ -413,12 +447,29 @@ export default class ElijahController
                         
                         return
                     }
+                    else if(b1.label === 'medkit' && b2.label === 'Elijah' && this.alive)
+                    {
+                        this.pickupSound.play()
+                        //console.log(bodyB.label)
+                        this.setHealth(this.health + 50)
+                        b1.gameObject.destroy()
+                        
+                        return
+                    }
                     if(b1.label === 'Elijah' && b2.label === 'ammo' && this.alive)
                     {
                         this.pickupSound.play()
                         //console.log(bodyB.label)
                         this.setBullets(this.bullets + 3)
                         b2.gameObject.destroy()
+                        return
+                    }
+                    else if(b1.label === 'ammo' && b2.label === 'Elijah' && this.alive)
+                    {
+                        this.pickupSound.play()
+                        //console.log(bodyB.label)
+                        this.setBullets(this.bullets + 3)
+                        b1.gameObject.destroy()
                         return
                     }
 
@@ -446,7 +497,11 @@ export default class ElijahController
                     }
                     if(b2.label === 'hitbox-shoot' && b1.label === 'pig-hitbox' && this.alive)
                     {
-                        b2.gameObject.destroy()
+                        if(b2.gameObject)
+                        {
+                            b2.gameObject.destroy()
+                        }
+                        
                         this.lastPig = b1.gameObject
                         events.emit('pig-killed',this.lastPig)
                         return
@@ -594,7 +649,7 @@ export default class ElijahController
             
         }
 
-        //console.log(this.lastGround)
+        //console.log(this.music1.isPlaying)
         
     }
 

@@ -51,5 +51,9 @@ export default class LoadRessources
         scene.load.audio('sword', 'ressources/audio/sword.mp3')
         scene.load.audio('weapon', 'ressources/audio/weapon.wav')
 
+        scene.load.audio('music1', 'ressources/music/music1.mp3')
+        scene.load.audio('music2', 'ressources/music/music2.mp3')
+        scene.load.audio('music3', 'ressources/music/music3.wav')
+
     }
 }
