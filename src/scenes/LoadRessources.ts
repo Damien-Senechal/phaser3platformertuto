@@ -42,5 +42,14 @@ export default class LoadRessources
         scene.load.audio('tongue_enter', 'ressources/audio/tongue_enter.wav')
         scene.load.audio('tongue_touch', 'ressources/audio/tongue_touch.wav')
         scene.load.audio('tongue_exit', 'ressources/audio/tongue_exit.wav')
+        scene.load.audio('ElijahDie', 'ressources/audio/ElijahDie.wav')
+        scene.load.audio('Run', 'ressources/audio/Run.wav')
+        scene.load.audio('Pickup', 'ressources/audio/Pickup.wav')
+        scene.load.audio('PigIdle', 'ressources/audio/pig.wav')
+        scene.load.audio('PigDie', 'ressources/audio/PigDie.wav')
+        scene.load.audio('grunt', 'ressources/audio/grunt.wav')
+        scene.load.audio('sword', 'ressources/audio/sword.mp3')
+        scene.load.audio('weapon', 'ressources/audio/weapon.wav')
+
     }
 }

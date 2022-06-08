@@ -50,6 +50,11 @@ export default class ElijahController
     private tongueEnterSound
     private tongueTouchSound
     private tongueExitSound
+    private dieSound
+    private runSound
+    private pickupSound
+    private swordSound
+    private weaponSound
 
     constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, smoke, ennemies: EnnemiesController)
     {
@@ -87,6 +92,13 @@ export default class ElijahController
         this.tongueEnterSound = this.scene.sound.add('tongue_enter')
         this.tongueTouchSound = this.scene.sound.add('tongue_touch')
         this.tongueExitSound = this.scene.sound.add('tongue_exit')
+        this.dieSound = this.scene.sound.add('ElijahDie')
+        this.runSound = this.scene.sound.add('Run')
+        this.runSound.loop = true
+        this.runSound.volume = .5
+        this.pickupSound = this.scene.sound.add('Pickup')
+        this.swordSound = this.scene.sound.add('sword')
+        this.weaponSound = this.scene.sound.add('weapon')
         
 
         this.inputManager()
@@ -299,6 +311,17 @@ export default class ElijahController
                         b2.gameObject.destroy()
                         return
                     }
+                    /*else if(b2.label === 'hitbox-shoot' || b1.label === 'hitbox-shoot')
+                    {
+                        if(!b1.isSensor && b2.label === 'hitbox-shoot')
+                        {
+                            b2.gameObject.destroy()
+                        }
+                        else if(!b2.isSensor && b1.label === 'hitbox-shoot')
+                        {
+                            b1.gameObject.destroy()
+                        }
+                    }*/
                     if(b1.label === 'hitbox-shoot' && b2.label === 'pig-hitbox' && this.alive)
                     {
                         b1.gameObject.destroy()
@@ -383,6 +406,7 @@ export default class ElijahController
 
                     if(b1.label === 'Elijah' && b2.label === 'medkit' && this.alive)
                     {
+                        this.pickupSound.play()
                         //console.log(bodyB.label)
                         this.setHealth(this.health + 50)
                         b2.gameObject.destroy()
@@ -391,6 +415,7 @@ export default class ElijahController
                     }
                     if(b1.label === 'Elijah' && b2.label === 'ammo' && this.alive)
                     {
+                        this.pickupSound.play()
                         //console.log(bodyB.label)
                         this.setBullets(this.bullets + 3)
                         b2.gameObject.destroy()
@@ -617,6 +642,7 @@ export default class ElijahController
 
     private walkOnEnter()
     {
+        this.runSound.play()
         if(this.activeWeapon === 'Hook')
         {
             this.sprite.play('walk')
@@ -692,7 +718,7 @@ export default class ElijahController
 
     private walkOnExit()
     {
-
+        this.runSound.stop()
     }
 
     private jumpOnEnter()
@@ -886,6 +912,7 @@ export default class ElijahController
         
         if(this.canBlade)
         {
+            this.swordSound.play()
             this.sprite.play('attackBlade')
             this.isSlashing = true
             this.canBlade = false
@@ -1022,6 +1049,7 @@ export default class ElijahController
 
     private deadOnEnter()
     {
+        this.dieSound.play()
         if(this.activeWeapon === 'Hook')
         {
             this.sprite.play('die')
@@ -1073,6 +1101,7 @@ export default class ElijahController
     private changeWeaponOnEnter()
     {
         //console.log('Weapon Changed !')
+        this.weaponSound.play()
         this.stateMachine.setState('idle')
     }
 

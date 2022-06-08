@@ -17,6 +17,10 @@ export default class PigController
     private moveTime = 0
     private speed = 1
 
+    private idleSound
+    private dieSound
+    private gruntSound
+
     constructor(scene: Phaser.Scene, sprite: Phaser.Physics.Matter.Sprite, ennemies: EnnemiesController, target: Phaser.Physics.Matter.Sprite, id: number)
     {
         this.scene = scene
@@ -24,6 +28,11 @@ export default class PigController
         this.ennemies = ennemies
         this.target = target
         this.id = id
+
+        this.idleSound = this.scene.sound.add('PigIdle')
+        this.idleSound.loop = true
+        this.dieSound = this.scene.sound.add('PigDie')
+        this.gruntSound = this.scene.sound.add('grunt')
 
         this.createAnimations()
 
@@ -59,16 +68,19 @@ export default class PigController
         })
         .addState('move-left', {
             onEnter: this.moveLeftOnEnter,
-            onUpdate: this.moveLeftOnUpdate
+            onUpdate: this.moveLeftOnUpdate,
+            onExit: this.moveLeftOnExit
         })
         .addState('move-right', {
             onEnter: this.moveRightOnEnter,
-            onUpdate: this.moveRightOnUpdate
+            onUpdate: this.moveRightOnUpdate,
+            onExit: this.moveRightOnExit
         })
         .addState('dead', {
             onEnter: this.deadOnEnter
         })
         .addState('attack', {
+            onEnter: this.attackOnEnter,
             onUpdate: this.attackOnUpdate
         })
         .addState('back', {
@@ -216,6 +228,7 @@ export default class PigController
 
     private moveLeftOnEnter()
     {
+        this.idleSound.play()
         if(this.alive)
         {
             this.sprite.play('walkPig')
@@ -243,8 +256,14 @@ export default class PigController
         
     }
 
+    private moveLeftOnExit()
+    {
+        this.idleSound.stop()
+    }
+
     private moveRightOnEnter()
     {
+        this.idleSound.play()
         if(this.alive)
         {
             this.sprite.flipX = true
@@ -273,8 +292,15 @@ export default class PigController
         
     }
 
+    private moveRightOnExit()
+    {
+        this.idleSound.stop()
+    }
+
     private deadOnEnter()
     {
+        this.idleSound.stop()
+        this.dieSound.play()
         let corpse = this.scene.add.sprite(this.sprite.x, this.sprite.y, 'Pig')
         for (let i = 0; i < 50; i++) {
         let particle = this.scene.matter.add.image(Phaser.Math.Between(corpse.x-10, corpse.x+10), Phaser.Math.Between(corpse.y-10, corpse.y+10), 'blood', 0);
@@ -295,6 +321,10 @@ export default class PigController
         
     }
 
+    private attackOnEnter()
+    {
+        this.gruntSound.play()
+    }
 
     private attackOnUpdate()
     {
